@@ -1,13 +1,14 @@
 package dk.kb.ds.cumulus.export;
 
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
-import static org.junit.Assert.*;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 public class CumulusExportTest {
 
     @Test
     public void testSetup() {
-        assertTrue("Basic test run with always-pass should work", true);
+        assertTrue(true, "Basic test run with always-pass should work");
     }
 }
