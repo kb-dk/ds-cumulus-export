@@ -40,7 +40,7 @@
       <artifactId>logback-classic</artifactId>
       <version>1.2.3</version>
     </dependency>
-
+ 
       <!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-engine -->
       <dependency>
           <groupId>org.junit.jupiter</groupId>
@@ -55,6 +55,12 @@
           <artifactId>junit-platform-engine</artifactId>
           <version>1.5.2</version>
           <scope>test</scope>
+      </dependency>
+
+      <dependency>
+          <groupId>dk.kb</groupId>
+          <artifactId>kb-cumulus-api</artifactId>
+          <version>0.1.5</version>
       </dependency>
 
       
