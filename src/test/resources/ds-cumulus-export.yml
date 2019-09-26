@@ -1,0 +1,10 @@
+# Fill in the values for the keys and place the file as "ds-cumulus-export.yml"
+# on the classpath or in user.home.
+digisam:
+  cumulus:
+    server: $ URL for the Cumulus server
+    username: $ Cumulus user name
+    password: $ Cumulus user password
+    catalog: # List of Cumulus Catalogs
+      - cat1
+      - cat2

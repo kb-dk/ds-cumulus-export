@@ -57,13 +57,20 @@
           <scope>test</scope>
       </dependency>
 
+      <!-- Needs to be installed from https://github.com/Det-Kongelige-Bibliotek/KB-Cumulus-API with
+           mvn install -->
       <dependency>
           <groupId>dk.kb</groupId>
           <artifactId>kb-cumulus-api</artifactId>
           <version>0.1.5</version>
       </dependency>
-
       
+      <!-- https://mvnrepository.com/artifact/org.yaml/snakeyaml -->
+      <dependency>
+          <groupId>org.yaml</groupId>
+          <artifactId>snakeyaml</artifactId>
+          <version>1.25</version>
+      </dependency>
   </dependencies>
 
   <build>
