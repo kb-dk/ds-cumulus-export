@@ -5,6 +5,15 @@ Automated export from Cumulus
 * Java 11
 * Maven 3
 
+## Setup
+
+The exporter requires a YAML stating Cumulus server, userid, password etc.
+
+Copy `src/test/resources/ds-cumulus-export.yml` to `user.home` and fill in the missing values.
+Contact a KB-developer on the DigiSam-project for the credentials.
+
+(the location of the config file will be made flexible at a later point)
+
 ## Build & run
 
 This project requires both [Cumulus JAVA SDK](https://sbprojects.statsbiblioteket.dk/display/AIM/Cumulus+Java+SDK) 
