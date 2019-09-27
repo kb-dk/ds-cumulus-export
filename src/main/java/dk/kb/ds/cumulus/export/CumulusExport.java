@@ -14,7 +14,7 @@ public class CumulusExport {
 
         boolean writeAccess = false;
         try (CumulusServer server = new CumulusServer(Configuration.getCumulusConf())) {
-            String myCatalog = String.valueOf(Configuration.getCumulusConf().getCatalogs());
+            String myCatalog = Configuration.getCumulusConf().getCatalogs().get(0);
             CumulusQuery query = CumulusQuery.getQueryForAllInCatalog(myCatalog);
             CumulusRecordCollection recordCollection = server.getItems(myCatalog, query);
 
