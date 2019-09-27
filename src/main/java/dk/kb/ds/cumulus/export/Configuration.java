@@ -80,7 +80,7 @@ public class Configuration {
         log.debug("Looking for '" + DEFAULT_CONF_FILE + "' on the classpath");
         URL configURL = Thread.currentThread().getContextClassLoader().getResource(DEFAULT_CONF_FILE);
         if (configURL ==  null) {
-            log.debug("Looking for '" + DEFAULT_CONF_FILE + "' on the classpath");
+            log.debug("Looking for '" + DEFAULT_CONF_FILE + "' on the user home path");
             Path configPath = Path.of(System.getProperty("user.home"), DEFAULT_CONF_FILE);
             if (!configPath.toFile().exists()) {
                 String message = "Unable to locate '" + DEFAULT_CONF_FILE + "' on the classpath or in user.home, " +
