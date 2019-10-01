@@ -44,9 +44,11 @@ public class CumulusExport {
                 Element docElement = document.createElement("doc");
                 rootElement.appendChild(docElement);
                 try {
-                    String title = record.getFieldValue("Titel");
-                    String guid = record.getFieldValue("guid");
+                    String title = record.getFieldValueOrNull("Titel");
+                    String guid = record.getFieldValueOrNull("guid");
 //                    String date = record.getFieldValue("Date Time Digitized");
+                    String categories = record.getFieldValueOrNull("Categories");
+                    String topics = record.getFieldValueOrNull("Emneord");
 
                     Element fieldElement = document.createElement("field");
                     docElement.appendChild(fieldElement);
@@ -54,16 +56,29 @@ public class CumulusExport {
                     fieldElement.appendChild(nameElement);
                     Element idElement = document.createElement("id");
                     idElement.appendChild(document.createTextNode("kb_image_" + "_" + guid));
-                    Element titleElement = document.createElement("title");
-                    titleElement.appendChild(document.createTextNode(title));
-//                    Element dateElement = document.createElement("date");
-//                    dateElement.appendChild(document.createTextNode(date));
                     nameElement.appendChild(idElement);
-                    nameElement.appendChild(titleElement);
+                    if (title != null){
+                        Element titleElement = document.createElement("title");
+                        titleElement.appendChild(document.createTextNode(title));
+                        nameElement.appendChild(titleElement);
+                    }
+                    if (categories != null){
+                        Element categoriesElement = document.createElement("categories");
+                        categoriesElement.appendChild(document.createTextNode(categories));
+                        nameElement.appendChild(categoriesElement);
+                    }
+                    if (topics != null) {
+                        Element topicsElement = document.createElement("topics");
+                        topicsElement.appendChild(document.createTextNode(topics));
+                        nameElement.appendChild(topicsElement);
+                    }
+//
+//                  Element dateElement = document.createElement("date");
+//                    dateElement.appendChild(document.createTextNode(date));
 //                    nameElement.appendChild(dateElement);
 
                 } catch (Exception e) {
-                    System.err.println(e);
+                    System.err.println(e); // Just during development
 //                    break;
                 }
             }
