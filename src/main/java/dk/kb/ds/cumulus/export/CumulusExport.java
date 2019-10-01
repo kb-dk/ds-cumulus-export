@@ -25,7 +25,6 @@ import java.io.OutputStream;
 public class CumulusExport {
     public static void main(String[] args) throws IOException, TransformerException, ParserConfigurationException {
 
-        boolean writeAccess = false;
         try (CumulusServer server = new CumulusServer(Configuration.getCumulusConf())) {
             String myCatalog = Configuration.getCumulusConf().getCatalogs().get(0);
             CumulusQuery query = CumulusQuery.getQueryForAllInCatalog(myCatalog);
@@ -40,54 +39,38 @@ public class CumulusExport {
             Document document = docBuilder.newDocument();
             Element rootElement = document.createElement("add");
             document.appendChild(rootElement);
+
             for (CumulusRecord record : recordCollection) {
                 Element docElement = document.createElement("doc");
                 rootElement.appendChild(docElement);
                 try {
-                    String title = record.getFieldValueOrNull("Titel");
-                    String guid = record.getFieldValueOrNull("guid");
-//                    String date = record.getFieldValue("Date Time Digitized");
-                    String categories = record.getFieldValueOrNull("Categories");
-                    String topics = record.getFieldValueOrNull("Emneord");
+                    String id = record.getFieldValueOrNull("guid");
+                    String titleC = record.getFieldValueOrNull("Titel");
+                    String dateC = record. getFieldValueForNonStringField("Date Time Digitized");
+                    String categoriesC = record.getFieldValueOrNull("Categories");
+                    String topicC = record.getFieldValueOrNull("Emneord");
+                    String copyrightC = record.getFieldValueOrNull("Copyright Notice");
 
-                    Element fieldElement = document.createElement("field");
-                    docElement.appendChild(fieldElement);
-                    Element nameElement = document.createElement("name");
-                    fieldElement.appendChild(nameElement);
-                    Element idElement = document.createElement("id");
-                    idElement.appendChild(document.createTextNode("kb_image_" + "_" + guid));
-                    nameElement.appendChild(idElement);
-                    if (title != null){
-                        Element titleElement = document.createElement("title");
-                        titleElement.appendChild(document.createTextNode(title));
-                        nameElement.appendChild(titleElement);
-                    }
-                    if (categories != null){
-                        Element categoriesElement = document.createElement("categories");
-                        categoriesElement.appendChild(document.createTextNode(categories));
-                        nameElement.appendChild(categoriesElement);
-                    }
-                    if (topics != null) {
-                        Element topicsElement = document.createElement("topics");
-                        topicsElement.appendChild(document.createTextNode(topics));
-                        nameElement.appendChild(topicsElement);
-                    }
-//
-//                  Element dateElement = document.createElement("date");
-//                    dateElement.appendChild(document.createTextNode(date));
-//                    nameElement.appendChild(dateElement);
+                    String[] attributeContent = {id, titleC, dateC, categoriesC, topicC, copyrightC};
+                    String[] attributeName = {"id", "title", "date", "categories", "topic", "copyright"};
 
+                    for (int i = 0; i < attributeName.length; i++) {
+                        if (attributeContent[i] != null) {
+                            Element fieldElement = document.createElement("field");
+                            fieldElement.setAttribute("name", attributeName[i]);
+                            docElement.appendChild(fieldElement);
+                            fieldElement.appendChild(document.createTextNode(attributeContent[i]));
+                        }
+                    }
                 } catch (Exception e) {
                     System.err.println(e); // Just during development
-//                    break;
                 }
             }
                     // write the content into xml file
             TransformerFactory transformerFactory = TransformerFactory.newInstance();
             Transformer transformer = transformerFactory.newTransformer();
             transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-            transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
-
+            transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
             DOMSource source = new DOMSource(document);
             StreamResult result = new StreamResult(out);
             transformer.transform(source, result);
