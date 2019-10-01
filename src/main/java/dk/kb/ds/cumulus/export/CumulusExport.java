@@ -4,14 +4,26 @@ import dk.kb.cumulus.CumulusQuery;
 import dk.kb.cumulus.CumulusRecord;
 import dk.kb.cumulus.CumulusRecordCollection;
 import dk.kb.cumulus.CumulusServer;
+import dk.kb.cumulus.utils.ArgumentCheck;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 
 public class CumulusExport {
     public static void main(String[] args) throws IOException, TransformerException, ParserConfigurationException {
-//        System.out.println("Cumulus exporter");
 
         boolean writeAccess = false;
         try (CumulusServer server = new CumulusServer(Configuration.getCumulusConf())) {
@@ -19,23 +31,51 @@ public class CumulusExport {
             CumulusQuery query = CumulusQuery.getQueryForAllInCatalog(myCatalog);
             CumulusRecordCollection recordCollection = server.getItems(myCatalog, query);
 
-            System.out.println("<add>");
+            File outputFile = new File("solrInputFile.xml");
+            OutputStream out = new FileOutputStream(outputFile);
+
+            ArgumentCheck.checkNotNull(out, "OutputStream out");
+            DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+            Document document = docBuilder.newDocument();
+            Element rootElement = document.createElement("add");
+            document.appendChild(rootElement);
             for (CumulusRecord record : recordCollection) {
-                System.out.println("<doc>");
+                Element docElement = document.createElement("doc");
+                rootElement.appendChild(docElement);
+                try {
+                    String title = record.getFieldValue("Titel");
+                    String guid = record.getFieldValue("guid");
+//                    String date = record.getFieldValue("Date Time Digitized");
 
-                String name = record.getFieldValue("Record Name");
-                String guid = record.getFieldValue("guid");
-//                System.out.println("Record: " + name + " with GUID " + guid);
-                System.out.println("<field name=\"id\">kb_image_" + myCatalog + "_" + guid + "</field>");
+                    Element fieldElement = document.createElement("field");
+                    docElement.appendChild(fieldElement);
+                    Element nameElement = document.createElement("name");
+                    fieldElement.appendChild(nameElement);
+                    Element idElement = document.createElement("id");
+                    idElement.appendChild(document.createTextNode("kb_image_" + "_" + guid));
+                    Element titleElement = document.createElement("title");
+                    titleElement.appendChild(document.createTextNode(title));
+//                    Element dateElement = document.createElement("date");
+//                    dateElement.appendChild(document.createTextNode(date));
+                    nameElement.appendChild(idElement);
+                    nameElement.appendChild(titleElement);
+//                    nameElement.appendChild(dateElement);
 
-                CumulusRecord fullRecord = server.findCumulusRecordByName(myCatalog, name);
-//                System.out.println(fullRecord);
-//                record.writeFieldMetadata(System.out);
-                System.out.println("<field name=\"title\">" + record.getFieldValue("Titel") + "</field>");
-
-                System.out.println("</doc>");
+                } catch (Exception e) {
+                    System.err.println(e);
+//                    break;
+                }
             }
-            System.out.println("</add>");
+                    // write the content into xml file
+            TransformerFactory transformerFactory = TransformerFactory.newInstance();
+            Transformer transformer = transformerFactory.newTransformer();
+            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+            transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
+
+            DOMSource source = new DOMSource(document);
+            StreamResult result = new StreamResult(out);
+            transformer.transform(source, result);
         }
     }
 }
