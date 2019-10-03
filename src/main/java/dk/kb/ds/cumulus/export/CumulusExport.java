@@ -21,52 +21,56 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 
 public class CumulusExport {
-    public static void main(String[] args) throws IOException, TransformerException, ParserConfigurationException {
+    public static void main(String[] args) throws Exception {
 
         try (CumulusServer server = new CumulusServer(Configuration.getCumulusConf())) {
+            //Select the first Cumulus catalog from the configuration
             String myCatalog = Configuration.getCumulusConf().getCatalogs().get(0);
             CumulusQuery query = CumulusQuery.getQueryForAllInCatalog(myCatalog);
             CumulusRecordCollection recordCollection = server.getItems(myCatalog, query);
 
             File outputFile = new File("solrInputFile.xml");
             OutputStream out = new FileOutputStream(outputFile);
-
             ArgumentCheck.checkNotNull(out, "OutputStream out");
             DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
             Document document = docBuilder.newDocument();
+
             Element rootElement = document.createElement("add");
             document.appendChild(rootElement);
 
             for (CumulusRecord record : recordCollection) {
                 Element docElement = document.createElement("doc");
                 rootElement.appendChild(docElement);
-                try {
-                    String id = record.getFieldValueOrNull("guid");
-                    String titleC = record.getFieldValueOrNull("Titel");
-                    String dateC = record. getFieldValueForNonStringField("Date Time Digitized");
-                    String categoriesC = record.getFieldValueOrNull("Categories");
-                    String topicC = record.getFieldValueOrNull("Emneord");
-                    String copyrightC = record.getFieldValueOrNull("Copyright Notice");
+                // Get  metadata from Cumulus
+                String id = record.getFieldValueOrNull("guid");
+                String title = record.getFieldValueOrNull("Titel");
+                String tmpCreationDate = record.getFieldValueForNonStringField("Item Creation Date");
+                String created_date = getUTCTime(tmpCreationDate);
+                String keyword = record.getFieldValueOrNull("Categories");
+                String topic = record.getFieldValueOrNull("Emneord");
+                String copyright = record.getFieldValueOrNull("Copyright Notice");
 
-                    String[] attributeContent = {id, titleC, dateC, categoriesC, topicC, copyrightC};
-                    String[] attributeName = {"id", "title", "date", "categories", "topic", "copyright"};
+                String[] attributeContent = {id, title, created_date, keyword, topic, copyright};
+                String[] attributeName = {"id", "title", "created_date", "keyword", "topic", "copyright"};
 
-                    for (int i = 0; i < attributeName.length; i++) {
-                        if (attributeContent[i] != null) {
-                            Element fieldElement = document.createElement("field");
-                            fieldElement.setAttribute("name", attributeName[i]);
-                            docElement.appendChild(fieldElement);
-                            fieldElement.appendChild(document.createTextNode(attributeContent[i]));
-                        }
+                //Add the fields above to xml-file
+                for (int i = 0; i < attributeName.length; i++) {
+                    if (attributeContent[i] != null) {
+                        Element fieldElement = document.createElement("field");
+                        fieldElement.setAttribute("name", attributeName[i]);
+                        docElement.appendChild(fieldElement);
+                        fieldElement.appendChild(document.createTextNode(attributeContent[i]));
                     }
-                } catch (Exception e) {
-                    System.err.println(e); // Just during development
                 }
             }
-                    // write the content into xml file
+            // save the content to xml-file with specific formatting
             TransformerFactory transformerFactory = TransformerFactory.newInstance();
             Transformer transformer = transformerFactory.newTransformer();
             transformer.setOutputProperty(OutputKeys.INDENT, "yes");
@@ -75,5 +79,13 @@ public class CumulusExport {
             StreamResult result = new StreamResult(out);
             transformer.transform(source, result);
         }
+    }
+
+    private static String getUTCTime(String created_date_tmp) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("ccc LLL dd HH:mm:ss zzz yyy");
+        LocalDateTime created_date_formatted = LocalDateTime.parse(created_date_tmp, formatter);
+        LocalDateTime created_date_UTC = created_date_formatted.atZone(ZoneId.of("Europe/Copenhagen"))
+            .withZoneSameInstant(ZoneOffset.UTC).toLocalDateTime();
+        return created_date_UTC + "Z";
     }
 }
