@@ -92,6 +92,8 @@ public class CumulusExport {
         LocalDateTime created_date_formatted = LocalDateTime.parse(created_date_tmp, formatter);
         LocalDateTime created_date_UTC = created_date_formatted.atZone(ZoneId.of("Europe/Copenhagen"))
             .withZoneSameInstant(ZoneOffset.UTC).toLocalDateTime();
-        return created_date_UTC + "Z";
+
+        DateTimeFormatter isotimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        return created_date_UTC.format(isotimeFormatter);
     }
 }
