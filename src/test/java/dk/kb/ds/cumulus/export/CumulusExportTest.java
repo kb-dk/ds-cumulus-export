@@ -18,5 +18,8 @@ public class CumulusExportTest {
 
         // Daylight saving time: Zulu time is 2 hours ahead
         assertEquals("2019-10-04T08:05:10Z", CumulusExport.getUTCTime("Fri Oct 04 10:05:10 CET 2019"));
+
+        //
+        assertEquals("2018-05-23T07:54:00Z", CumulusExport.getUTCTime("Wed May 23 09:54:00 CEST 2018"));
     }
 }
