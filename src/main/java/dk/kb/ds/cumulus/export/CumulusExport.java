@@ -48,17 +48,23 @@ public class CumulusExport {
             for (CumulusRecord record : recordCollection) {
                 Element docElement = document.createElement("doc");
                 rootElement.appendChild(docElement);
+
+                //TODO: get those two from the correct place
+                String collection = "Samlingsbilleder";
+                String type = "image";
+
                 // Get  metadata from Cumulus
                 String id = record.getFieldValueOrNull("guid");
                 String title = record.getFieldValueOrNull("Titel");
                 String tmpCreationDate = record.getFieldValueForNonStringField("Item Creation Date");
                 String created_date = getUTCTime(tmpCreationDate);
                 String keyword = record.getFieldValueOrNull("Categories");
-                String topic = record.getFieldValueOrNull("Emneord");
+                String subject = record.getFieldValueOrNull("Emneord");
                 String copyright = record.getFieldValueOrNull("Copyright Notice");
 
-                String[] attributeContent = {id, title, created_date, keyword, topic, copyright};
-                String[] attributeName = {"id", "title", "created_date", "keyword", "topic", "copyright"};
+
+                String[] attributeContent = {id, collection, type, title, created_date, keyword, subject, copyright};
+                String[] attributeName = {"id", "collection", "type", "title", "created_date", "keyword", "subject", "copyright"};
 
                 //Add the fields above to xml-file
                 for (int i = 0; i < attributeName.length; i++) {
