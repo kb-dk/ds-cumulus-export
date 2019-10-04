@@ -81,7 +81,7 @@ public class CumulusExport {
         }
     }
 
-    private static String getUTCTime(String created_date_tmp) {
+    static String getUTCTime(String created_date_tmp) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("ccc LLL dd HH:mm:ss zzz yyy");
         LocalDateTime created_date_formatted = LocalDateTime.parse(created_date_tmp, formatter);
         LocalDateTime created_date_UTC = created_date_formatted.atZone(ZoneId.of("Europe/Copenhagen"))
