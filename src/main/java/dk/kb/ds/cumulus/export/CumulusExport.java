@@ -60,11 +60,11 @@ public class CumulusExport {
                 String created_date = getUTCTime(tmpCreationDate);
                 String keyword = record.getFieldValueOrNull("Categories");
                 String subject = record.getFieldValueOrNull("Emneord");
-                String copyright = record.getFieldValueOrNull("Copyright Notice");
+                String license = record.getFieldValueOrNull("Copyright Notice");
 
 
-                String[] attributeContent = {id, collection, type, title, created_date, keyword, subject, copyright};
-                String[] attributeName = {"id", "collection", "type", "title", "created_date", "keyword", "subject", "copyright"};
+                String[] attributeContent = {id, collection, type, title, created_date, keyword, subject, license};
+                String[] attributeName = {"id", "collection", "type", "title", "created_date", "keyword", "subject", "license"};
 
                 //Add the fields above to xml-file
                 for (int i = 0; i < attributeName.length; i++) {
