@@ -56,12 +56,11 @@ public class CumulusExport {
                 // Get  metadata from Cumulus
                 String id = record.getFieldValueOrNull("guid");
                 String title = record.getFieldValueOrNull("Titel");
-                String tmpCreationDate = record.getFieldValueForNonStringField("Item Creation Date");
-                String created_date = getUTCTime(tmpCreationDate);
+                String creationDate = record.getFieldValueForNonStringField("Item Creation Date");
+                String created_date = getUTCTime(creationDate);
                 String keyword = record.getFieldValueOrNull("Categories");
                 String subject = record.getFieldValueOrNull("Emneord");
                 String license = record.getFieldValueOrNull("Copyright Notice");
-
 
                 String[] attributeContent = {id, collection, type, title, created_date, keyword, subject, license};
                 String[] attributeName = {"id", "collection", "type", "title", "created_date", "keyword", "subject", "license"};
@@ -87,13 +86,12 @@ public class CumulusExport {
         }
     }
 
-    static String getUTCTime(String created_date_tmp) {
+    static String getUTCTime(String createdDate) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("ccc LLL dd HH:mm:ss zzz yyy");
-        LocalDateTime created_date_formatted = LocalDateTime.parse(created_date_tmp, formatter);
-        LocalDateTime created_date_UTC = created_date_formatted.atZone(ZoneId.of("Europe/Copenhagen"))
+        LocalDateTime createdDateFormatted = LocalDateTime.parse(createdDate, formatter);
+        LocalDateTime createdDateUTC = createdDateFormatted.atZone(ZoneId.of("Europe/Copenhagen"))
             .withZoneSameInstant(ZoneOffset.UTC).toLocalDateTime();
-
-        DateTimeFormatter isotimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
-        return created_date_UTC.format(isotimeFormatter);
+        DateTimeFormatter isoTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        return createdDateUTC.format(isoTimeFormatter);
     }
 }
