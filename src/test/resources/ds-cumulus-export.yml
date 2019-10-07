@@ -1,6 +1,9 @@
 # Fill in the values for the keys and place the file as "ds-cumulus-export.yml"
 # on the classpath or in user.home.
 digisam:
+  outputfile: $ Name of outputfile for solr
+  collection: $ Name of the Cumulus collection
+  type: $ Type of object e.g. image, sound, text
   cumulus:
     server: $ URL for the Cumulus server
     username: $ Cumulus user name
@@ -8,3 +11,4 @@ digisam:
     catalog: # List of Cumulus Catalogs
       - cat1
       - cat2
+

@@ -49,7 +49,6 @@ public class Configuration {
 
     public static final String DEFAULT_CONF_FILE = "ds-cumulus-export.yml";
 
-
     /** The root element of the YAML configuration.*/
     public static final String CONF_ROOT = "digisam";
     /** Cumulus node-element.*/
@@ -62,6 +61,12 @@ public class Configuration {
     public static final String CONF_CUMULUS_PASSWORD = "password";
     /** The cumulus catalogs array leaf-element.*/
     public static final String CONF_CUMULUS_CATALOG = "catalog";
+    /** The Cumulus collection */
+    public static final String CONF_CUMULUS_COLLECTION = "collection";
+    /** The output file for solr */
+    public static final String CONF_OUTPUT_FILE = "outputfile";
+    /** The type of object to get info from */
+    public static final String CONF_TYPE = "type";
 
     /** Whether Cumulus should have write access. */
     protected static final boolean CUMULUS_WRITE_ACCESS = false;
@@ -70,6 +75,9 @@ public class Configuration {
     private LinkedHashMap<String, Object> confMap = null;
     /** The configuration for Cumulus.*/
     protected final CumulusConfiguration cumulusConf;
+    private final Object outputFile;
+    private final Object collection;
+    private final Object type;
     /**
      * Loads the DS Cumulus Export YAML configuration file from classpath or user home.
      * @throws IOException is the configuration could not be located or retrieved.
@@ -108,10 +116,24 @@ public class Configuration {
                                 "Configuration must contain the '" + CONF_ROOT + "' element.");
         confMap = (LinkedHashMap<String, Object>) rootMap.get(CONF_ROOT);
         this.cumulusConf = loadCumulusConfiguration((Map<String, Object>) confMap.get(CONF_CUMULUS));
+        this.collection = confMap.get(CONF_CUMULUS_COLLECTION);
+        this.outputFile = confMap.get(CONF_OUTPUT_FILE);
+        this.type = confMap.get(CONF_TYPE);
     }
 
     public static CumulusConfiguration getCumulusConf() {
         return instance().cumulusConf;
+    }
+
+    public static Object getCollection(){
+        return instance().collection;
+    }
+    public static Object getOutputFile(){
+        return instance().outputFile;
+    }
+
+    public static Object getType(){
+        return instance().type;
     }
 
     public static synchronized Configuration instance() {
