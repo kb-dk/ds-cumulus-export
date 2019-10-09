@@ -43,7 +43,7 @@ java -cp /usr/local/Cumulus_Java_SDK/CumulusJC.jar:target/kb-cumulus-api-0.1.5-j
 When this is done, we can run
 ```
 mvn package
-java -cp target/cumulus-export-0.1-SNAPSHOT.jar dk.kb.ds.cumulus.export.CumulusExport
+java -cp /usr/local/Cumulus_Java_SDK/CumulusJC.jar:target/cumulus-export-0.1-SNAPSHOT-jar-with-dependencies.jar dk.kb.ds.cumulus.export.CumulusExport
 ```
 
 ## Status
