@@ -51,7 +51,7 @@ public class CumulusExport {
                 String type = Configuration.getType().toString();
 
                 // Get  metadata from Cumulus
-                String id = record.getFieldValueOrNull("guid");
+                String id = "ds_" + collection + "_" + record.getFieldValueOrNull("guid");
                 String title = record.getFieldValueOrNull("Titel");
                 String creationDate = record.getFieldValueForNonStringField("Item Creation Date");
                 String created_date = getUTCTime(creationDate);
