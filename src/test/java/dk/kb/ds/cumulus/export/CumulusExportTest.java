@@ -22,4 +22,20 @@ public class CumulusExportTest {
         //
         assertEquals("2018-05-23T07:54:00Z", CumulusExport.getUTCTime("Wed May 23 09:54:00 CEST 2018"));
     }
+
+    @Test
+    public void testConvertCollectionToSolrFormat() {
+        // Remove special chars, replace space with underscore
+        assertEquals("Samlings_billeder", CumulusExport.convertCollectionToSolrFormat("[S+am¤%lings bil>led\"er@£€¡![=?"));
+
+        // Keep literals
+        assertEquals("æøåöéñäÄÖ", CumulusExport.convertCollectionToSolrFormat("æøåöéñäÄÖ"));
+    }
+
+    @Test
+    public void testGetConfigurationType() {
+        // How to make test data for config type?
+//        String configType = CumulusExport.getConfigurationType();
+//        assertEquals("image", configType);
+    }
 }
