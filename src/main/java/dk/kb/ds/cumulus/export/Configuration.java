@@ -112,13 +112,23 @@ public class Configuration {
         }
 
         LinkedHashMap<String, Object> rootMap = (LinkedHashMap<String, Object>) raw;
+
         ArgumentCheck.checkTrue(rootMap.containsKey(CONF_ROOT),
                                 "Configuration must contain the '" + CONF_ROOT + "' element.");
+
         confMap = (LinkedHashMap<String, Object>) rootMap.get(CONF_ROOT);
+
         this.cumulusConf = loadCumulusConfiguration((Map<String, Object>) confMap.get(CONF_CUMULUS));
-        this.collection = confMap.get(CONF_CUMULUS_COLLECTION);
-        this.outputFile = confMap.get(CONF_OUTPUT_FILE);
-        this.type = confMap.get(CONF_TYPE);
+
+        this.collection = getObject(confMap, CONF_CUMULUS_COLLECTION);
+        this.outputFile = getObject(confMap, CONF_OUTPUT_FILE);
+        this.type = getObject(confMap, CONF_TYPE);
+    }
+
+    private Object getObject(LinkedHashMap<String, Object> map, String confElement) {
+        ArgumentCheck.checkTrue(map.containsKey(confElement), "Missing configuration element '" + confElement + "'");
+        log.info("Processing configuration element '" + confElement + "'");
+        return map.get(confElement);
     }
 
     public static CumulusConfiguration getCumulusConf() {

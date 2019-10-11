@@ -22,8 +22,13 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.List;
 
 public class CumulusExport {
+    // List of valid types
+    private static List<String> listOfType = Arrays.asList("image", "moving_image", "sound", "text", "other");
+
     public static void main(String[] args) throws Exception {
 
         try (CumulusServer server = new CumulusServer(Configuration.getCumulusConf())) {
@@ -41,14 +46,12 @@ public class CumulusExport {
 
             Element rootElement = document.createElement("add");
             document.appendChild(rootElement);
-
+            // Get configurations
+            String collection = convertCollectionToSolrFormat(Configuration.getCollection().toString()) ;
+            String type = getConfigurationType();
             for (CumulusRecord record : recordCollection) {
                 Element docElement = document.createElement("doc");
                 rootElement.appendChild(docElement);
-
-                // Get configurations
-                String collection = Configuration.getCollection().toString();
-                String type = Configuration.getType().toString();
 
                 // Get  metadata from Cumulus
                 String id = "ds_" + collection + "_" + record.getFieldValueOrNull("guid");
@@ -81,6 +84,21 @@ public class CumulusExport {
             StreamResult result = new StreamResult(out);
             transformer.transform(source, result);
         }
+    }
+
+    // Check for valid type
+    static String getConfigurationType() {
+        String retValue = Configuration.getType().toString();
+        if (listOfType.contains(retValue)){
+            return retValue;
+        }
+        return "other";
+    }
+
+    // Remove special chars and replace space with underscore
+    static String convertCollectionToSolrFormat(String toString) {
+        String tmp = toString.replaceAll("[^\\p{L}\\p{Z}]","");
+        return tmp.replaceAll("\\s","_");
     }
 
     static String getUTCTime(String createdDate) {
