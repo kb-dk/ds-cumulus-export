@@ -61,9 +61,10 @@ public class CumulusExport {
                 String keyword = record.getFieldValueOrNull("Categories");
                 String subject = record.getFieldValueOrNull("Emneord");
                 String license = record.getFieldValueOrNull("Copyright Notice");
+                String image_url = record.getAssetReference("Asset Reference").getPart(0).getDisplayString();
 
-                String[] attributeContent = {id, collection, type, title, created_date, keyword, subject, license};
-                String[] attributeName = {"id", "collection", "type", "title", "created_date", "keyword", "subject", "license"};
+                String[] attributeContent = {id, collection, type, title, created_date, keyword, subject, license, image_url};
+                String[] attributeName = {"id", "collection", "type", "title", "created_date", "keyword", "subject", "license", "image_url"};
 
                 //Add the fields above to xml-file
                 for (int i = 0; i < attributeName.length; i++) {
