@@ -6,20 +6,87 @@
     <version>0.1-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>cumulus-export</name>
+    <url>http://www.kb.dk</url>
 
-    <properties>
-        <build.time>${maven.build.timestamp}</build.time>
-        <maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
-        <java.main.class>dk.kb.ds.cumulus.export.CumulusExport</java.main.class>
-    </properties>
-
+    <parent>
+      <groupId>dk.statsbiblioteket.sbprojects</groupId>
+      <artifactId>sbprojects-parent</artifactId>
+      <version>17</version>
+    </parent>
     <scm>
         <url>https://github.com/Det-Kongelige-Bibliotek/ds-cumulus-export</url>
         <connection>scm:git:ssh://git@github.com:Det-Kongelige-Bibliotek/ds-cumulus-export.git</connection>
         <developerConnection>scm:git:ssh://git@github.com:Det-Kongelige-Bibliotek/ds-cumulus-export.git</developerConnection>
-        <tag>HEAD</tag>
     </scm>
+    <!-- TODO: Move the KB-cumulus-api to sbforge and change the location below -->
+    <repositories>
+      <repository>
+        <id>sbprojects-nexus</id>
+        <url>https://sbprojects.statsbiblioteket.dk/nexus/content/groups/public</url>
+        <releases>
+          <enabled>true</enabled>
+        </releases>
+        <snapshots>
+          <enabled>true</enabled>
+        </snapshots>
+      </repository>
+    </repositories>
+    
+    <properties>
+        <build.time>${maven.build.timestamp}</build.time>
+        <maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
+        <java.main.class>dk.kb.ds.cumulus.export.CumulusExport</java.main.class>
+        <test.groups>fast</test.groups>
+    </properties>
 
+    <profiles>
+      <profile>
+        <id>allTests</id>
+        <properties>
+          <test.groups>fast,slow</test.groups>
+        </properties>
+      </profile>
+    </profiles>
+
+    <developers>
+      <developer>
+        <name>Toke Eskildsen</name>
+        <email>toes@kb.dk</email>
+        <organization>kb</organization>
+        <organizationUrl>http://kb.dk</organizationUrl>
+        <roles>
+          <role>Developer</role>
+        </roles>
+      </developer>
+      <developer>
+        <name>Nader Khatibi</name>
+        <email>nkh@kb.dk</email>
+        <organization>kb</organization>
+        <organizationUrl>http://kb.dk</organizationUrl>
+        <roles>
+          <role>Developer</role>
+        </roles>
+      </developer>
+      <developer>
+        <name>Dan Haarslev Egebo</name>
+        <email>dahe@kb.dk</email>
+        <organization>kb</organization>
+        <organizationUrl>http://kb.dk</organizationUrl>
+        <roles>
+          <role>Developer</role>
+        </roles>
+      </developer>
+      <developer>
+        <name>Knud Åge Hansen</name>
+        <email>kaah@kb.dk</email>
+        <organization>kb</organization>
+        <organizationUrl>http://kb.dk</organizationUrl>
+        <roles>
+          <role>Developer</role>
+        </roles>
+      </developer>
+    </developers>
+    
     <dependencies>
         <dependency>
             <groupId>org.sbforge</groupId>
