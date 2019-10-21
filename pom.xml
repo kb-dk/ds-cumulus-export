@@ -63,7 +63,7 @@
         <dependency>
             <groupId>dk.kb</groupId>
             <artifactId>kb-cumulus-api</artifactId>
-            <version>0.1.5</version>
+            <version>0.1.7-SNAPSHOT</version>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/org.yaml/snakeyaml -->
