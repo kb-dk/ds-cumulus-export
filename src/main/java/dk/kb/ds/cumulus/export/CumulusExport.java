@@ -5,6 +5,8 @@ import dk.kb.cumulus.CumulusRecord;
 import dk.kb.cumulus.CumulusRecordCollection;
 import dk.kb.cumulus.CumulusServer;
 import dk.kb.cumulus.utils.ArgumentCheck;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -28,6 +30,7 @@ import java.util.List;
 public class CumulusExport {
     // List of valid types
     private static List<String> listOfType = Arrays.asList("image", "moving_image", "sound", "text", "other");
+    private static final Logger log = LoggerFactory.getLogger(Configuration.class);
 
     public static void main(String[] args) throws Exception {
 
@@ -56,14 +59,18 @@ public class CumulusExport {
                 // Get  metadata from Cumulus
                 String id = "ds_" + collection + "_" + record.getFieldValueOrNull("guid");
                 String title = record.getFieldValueOrNull("Titel");
-                String creationDate = record.getFieldValueForNonStringField("Item Creation Date");
-                String created_date = getUTCTime(creationDate);
-                String keyword = record.getFieldValueOrNull("Categories");
-                String subject = record.getFieldValueOrNull("Emneord");
-                String license = record.getFieldValueOrNull("Copyright Notice");
+                String created_date = getUTCTime(record.getFieldValueForNonStringField("Item Creation Date"));
+                String keyword = record.getFieldValueOrNull("Keywords");
+                String subject = record.getFieldValueOrNull("Note");
+                String license = record.getFieldValueOrNull("Copyright");
+                String datetime = record.getFieldValueOrNull("År"); // TODO: Add conversion to solr format
+                String author = record.getFieldValueOrNull("Ophav");
 
-                String[] attributeContent = {id, collection, type, title, created_date, keyword, subject, license};
-                String[] attributeName = {"id", "collection", "type", "title", "created_date", "keyword", "subject", "license"};
+
+                String[] attributeContent = {id, collection, type, title, created_date, keyword, subject, license,
+                    datetime, author};
+                String[] attributeName = {"id", "collection", "type", "title", "created_date", "keyword", "subject", "license",
+                    "datetime", "author"};
 
                 //Add the fields above to xml-file
                 for (int i = 0; i < attributeName.length; i++) {
@@ -83,6 +90,7 @@ public class CumulusExport {
             DOMSource source = new DOMSource(document);
             StreamResult result = new StreamResult(out);
             transformer.transform(source, result);
+            log.debug("Created " + outputFile + " as input for solr.");
         }
     }
 
@@ -96,9 +104,10 @@ public class CumulusExport {
     }
 
     // Remove special chars and replace space with underscore
-    static String convertCollectionToSolrFormat(String toString) {
-        String tmp = toString.replaceAll("[^\\p{L}\\p{Z}]","");
-        return tmp.replaceAll("\\s","_");
+    static String convertCollectionToSolrFormat(String toSolr) {
+        return toSolr
+            .replaceAll("[^\\p{L}\\p{Z}]","")
+            .replaceAll("\\s","_");
     }
 
     static String getUTCTime(String createdDate) {
