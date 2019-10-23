@@ -30,7 +30,8 @@ import java.util.List;
 public class CumulusExport {
     // List of valid types
     private static List<String> listOfType = Arrays.asList("image", "moving_image", "sound", "text", "other");
-    private static final Logger log = LoggerFactory.getLogger(Configuration.class);
+
+    private static final Logger log = LoggerFactory.getLogger(CumulusExport.class);
 
     public static void main(String[] args) throws Exception {
 
