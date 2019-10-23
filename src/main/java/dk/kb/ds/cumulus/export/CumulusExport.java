@@ -64,7 +64,7 @@ public class CumulusExport {
                 String keyword = record.getFieldValueOrNull("Keywords");
                 String subject = record.getFieldValueOrNull("Note");
                 String license = record.getFieldValueForNonStringField("Copyright");
-                String datetime = record.getFieldValueOrNull("År"); // TODO: Add conversion to solr format
+                String datetime = record.getFieldValueOrNull("År");  //CalendarUtils.getDateTime("??", record.getFieldValueOrNull("År"));
                 String author = record.getFieldValueOrNull("Ophav");
 
 
