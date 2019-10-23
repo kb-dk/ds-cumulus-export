@@ -62,7 +62,7 @@ public class CumulusExport {
                 String created_date = getUTCTime(record.getFieldValueForNonStringField("Item Creation Date"));
                 String keyword = record.getFieldValueOrNull("Keywords");
                 String subject = record.getFieldValueOrNull("Note");
-                String license = record.getFieldValueOrNull("Copyright");
+                String license = record.getFieldValueForNonStringField("Copyright");
                 String datetime = record.getFieldValueOrNull("År"); // TODO: Add conversion to solr format
                 String author = record.getFieldValueOrNull("Ophav");
 
