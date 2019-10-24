@@ -16,5 +16,8 @@ class CalendarUtilsTest {
 
     @Test
     void getDateTime() {
+        assertEquals("1981-01-01T00:00:00.000+01:00", CalendarUtils.getDateTime("yyyy", "1981"));
+
+        assertEquals("1981-01-01T00:00:00.000+01:00", CalendarUtils.getDateTime("yyyy", "1981-1985"));
     }
 }
