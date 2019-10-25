@@ -49,6 +49,9 @@ public class CumulusExport {
             // Get configurations
             String collection = convertCollectionToSolrFormat(Configuration.getCollection().toString()) ;
             String type = getConfigurationType();
+            String image_url = "";
+
+            int counter = 0;
             for (CumulusRecord record : recordCollection) {
                 Element docElement = document.createElement("doc");
                 rootElement.appendChild(docElement);
@@ -61,7 +64,10 @@ public class CumulusExport {
                 String keyword = record.getFieldValueOrNull("Categories");
                 String subject = record.getFieldValueOrNull("Emneord");
                 String license = record.getFieldValueOrNull("Copyright Notice");
-                String image_url = record.getAssetReference("Asset Reference").getPart(0).getDisplayString();
+                String url = record.getAssetReference("Asset Reference").getPart(0).getDisplayString();
+
+                if (url != null || url != "")
+                    image_url = ImageUrl.makeUrl(url);
 
                 String[] attributeContent = {id, collection, type, title, created_date, keyword, subject, license, image_url};
                 String[] attributeName = {"id", "collection", "type", "title", "created_date", "keyword", "subject", "license", "image_url"};
@@ -75,6 +81,9 @@ public class CumulusExport {
                         fieldElement.appendChild(document.createTextNode(attributeContent[i]));
                     }
                 }
+                if (counter > 100)
+                    break;
+                counter++;
             }
             // save the content to xml-file with specific formatting
             TransformerFactory transformerFactory = TransformerFactory.newInstance();
