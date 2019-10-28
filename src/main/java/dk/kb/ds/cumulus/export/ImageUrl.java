@@ -6,7 +6,6 @@ import java.net.URL;
 public class ImageUrl {
 
     public static String makeUrl (String image_url) {
-        // cumulus-core-test-01:/Depot/DAM/test/Samlingsbilleder/0000/375/526/KE030219.tif
         String path1[] = image_url.split(".tif");
         String path2[] = path1[0].split(":/");
         String path = path2[1].replace("Depot/DAMX/Online_Master_Arkiv", "DAMJP2/online_master_arkiv");
@@ -14,9 +13,7 @@ public class ImageUrl {
 
         try {
             String http_url = image_url.replaceAll("https", "http");
-            //URL url = new URL(image_url);
             HttpURLConnection.setFollowRedirects(false);
-           // HttpURLConnection con = (HttpURLConnection)url.openConnection();
             HttpURLConnection con = (HttpURLConnection) new URL(http_url).openConnection();
             con.setRequestMethod("HEAD");
             boolean ok_image = (con.getResponseCode() == HttpURLConnection.HTTP_OK);
@@ -28,7 +25,5 @@ public class ImageUrl {
             e.printStackTrace();
             return null;
         }
-
-        //return image_url;
     }
 }

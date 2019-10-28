@@ -22,11 +22,11 @@ import static org.junit.jupiter.api.Assertions.*;
 class ImageUrlTest {
     @Test
     void testValid() {
-        /*
+
         String[][] TESTS = {
             {
                 "cumulus-core-01:/Depot/DAMX/Online_Master_Arkiv/non-archival/KOB/bs_kistebilleder-2/bs000132.tif",
-                "https://kb-images.kb.dk/Depot/DAMX/Online_Master_Arkiv/non-archival/KOB/bs_kistebilleder-2/bs000132/full/!345,2555/0/native.jpg"
+                "https://kb-images.kb.dk/DAMJP2/online_master_arkiv/non-archival/KOB/bs_kistebilleder-2/bs000132/full/!345,2555/0/native.jpg"
             },
             {
                 "cumulus-elsewhere:/Depot/DAMX/Online_Master_Arkiv/non-archival/KOB/bs_kistebilleder-2/bs000135.tif",
@@ -54,7 +54,5 @@ class ImageUrlTest {
                 // Exceptions are okay too, but we should decide on the right action
             }
         }
-
-         */
     }
  }
