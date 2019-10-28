@@ -20,6 +20,7 @@ import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.time.DateTimeException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
@@ -60,11 +61,14 @@ public class CumulusExport {
                 // Get  metadata from Cumulus
                 String id = "ds_" + collection + "_" + record.getFieldValueOrNull("guid");
                 String title = record.getFieldValueOrNull("Titel");
-                String created_date = getUTCTime(record.getFieldValueForNonStringField("Item Creation Date"));
+                String created_date = getUTCTime(record.getFieldValueForNonStringField("Item Creation Date")); //solr date
                 String keyword = record.getFieldValueOrNull("Keywords");
                 String subject = record.getFieldValueOrNull("Note");
                 String license = record.getFieldValueForNonStringField("Copyright");
-                String datetime = record.getFieldValueOrNull("År");  //CalendarUtils.getDateTime("??", record.getFieldValueOrNull("År"));
+
+                String datetimeFromCumulus = record.getFieldValueOrNull("År");  //CalendarUtils.getDateTime("??", record.getFieldValueOrNull("År"));
+                String datetime = CalendarUtils.convertDatetimeFormat(datetimeFromCumulus);; // solr date_range
+
                 String author = record.getFieldValueOrNull("Ophav");
 
 
@@ -95,6 +99,8 @@ public class CumulusExport {
         }
     }
 
+
+
     // Check for valid type
     static String getConfigurationType() {
         String retValue = Configuration.getType().toString();
@@ -111,12 +117,14 @@ public class CumulusExport {
             .replaceAll("\\s","_");
     }
 
-    static String getUTCTime(String createdDate) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("ccc LLL dd HH:mm:ss zzz yyy");
-        LocalDateTime createdDateFormatted = LocalDateTime.parse(createdDate, formatter);
-        LocalDateTime createdDateUTC = createdDateFormatted.atZone(ZoneId.of("Europe/Copenhagen"))
-            .withZoneSameInstant(ZoneOffset.UTC).toLocalDateTime();
-        DateTimeFormatter isoTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
-        return createdDateUTC.format(isoTimeFormatter);
-    }
+    static String getUTCTime(String createdDate) throws DateTimeException {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("ccc LLL dd HH:mm:ss zzz yyy");
+            LocalDateTime createdDateFormatted = LocalDateTime.parse(createdDate, formatter);
+            LocalDateTime createdDateUTC = createdDateFormatted.atZone(ZoneId.of("Europe/Copenhagen"))
+                .withZoneSameInstant(ZoneOffset.UTC).toLocalDateTime();
+            DateTimeFormatter isoTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
+            return createdDateUTC.format(isoTimeFormatter);
+        }
+//        DateTimeFormatter isoTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
+//        return createdDateUTC.format(isoTimeFormatter);
 }
