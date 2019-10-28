@@ -31,7 +31,7 @@
         </snapshots>
       </repository>
     </repositories>
-    
+
     <properties>
         <build.time>${maven.build.timestamp}</build.time>
         <maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
@@ -43,7 +43,7 @@
       <profile>
         <id>allTests</id>
         <properties>
-          <test.groups>fast,slow</test.groups>
+           <test.groups>fast,slow</test.groups>
         </properties>
       </profile>
     </profiles>
@@ -86,7 +86,7 @@
         </roles>
       </developer>
     </developers>
-    
+
     <dependencies>
         <dependency>
             <groupId>org.sbforge</groupId>

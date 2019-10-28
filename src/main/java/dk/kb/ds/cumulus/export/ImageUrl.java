@@ -1,6 +1,6 @@
 package dk.kb.ds.cumulus.export;
 
-import javax.net.ssl.HttpsURLConnection;
+import java.net.HttpURLConnection;
 import java.net.URL;
 
 public class ImageUrl {
@@ -11,16 +11,17 @@ public class ImageUrl {
         String path2[] = path1[0].split(":/");
         String path = path2[1].replace("Depot/DAMX/Online_Master_Arkiv", "DAMJP2/online_master_arkiv");
         image_url = "https://kb-images.kb.dk/" + path + "/full/!345,2555/0/native.jpg";
-        /*
-        try {
-            HttpsURLConnection.setFollowRedirects(false);
-            HttpsURLConnection con =
-                (HttpsURLConnection) new URL(image_url).openConnection();
-            con.setRequestMethod("HEAD");
-            boolean ok_image = (con.getResponseCode() == HttpsURLConnection.HTTP_OK);
 
-            String image_path = ok_image?  image_url:"null";
-            System.out.println("Path is : " +image_path);
+        try {
+            String http_url = image_url.replaceAll("https", "http");
+            //URL url = new URL(image_url);
+            HttpURLConnection.setFollowRedirects(false);
+           // HttpURLConnection con = (HttpURLConnection)url.openConnection();
+            HttpURLConnection con = (HttpURLConnection) new URL(http_url).openConnection();
+            con.setRequestMethod("HEAD");
+            boolean ok_image = (con.getResponseCode() == HttpURLConnection.HTTP_OK);
+
+            String image_path = ok_image?  image_url:null;
             return image_path;
         }
         catch (Exception e) {
@@ -28,7 +29,6 @@ public class ImageUrl {
             return null;
         }
 
-         */
-        return image_url;
+        //return image_url;
     }
 }
