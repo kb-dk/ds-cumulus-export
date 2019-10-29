@@ -14,15 +14,15 @@ class CalendarUtilsTest {
 
     @Test
     void convertDatetimeFormat() {
-//        assertEquals("1978-08-30", CalendarUtils.convertDatetimeFormat("1978.08.30"));
-//        assertEquals("1864-04-30", CalendarUtils.convertDatetimeFormat("1864-04-30"));
-//        assertEquals("1947-03", CalendarUtils.convertDatetimeFormat("1947.03"));
-//        assertEquals("1980", CalendarUtils.convertDatetimeFormat("1980"));
-//        assertEquals("1969-05", CalendarUtils.convertDatetimeFormat("1969.05?"));
-//        assertEquals("Midt af 1900-tallet", CalendarUtils.convertDatetimeFormat("Midt af 1900-tallet"));
-//        assertEquals("Ukendt", CalendarUtils.convertDatetimeFormat("Ukendt"));
-//        assertEquals("u.å.", CalendarUtils.convertDatetimeFormat("u.å."));
-        assertEquals("1972 TO 1979", CalendarUtils.convertDatetimeFormat("1972-1979"));
+        assertEquals("1978-08-30", CalendarUtils.convertDatetimeFormat("1978.08.30"));
+        assertEquals("1864-04-30", CalendarUtils.convertDatetimeFormat("1864-04-30"));
+        assertEquals("1947-03", CalendarUtils.convertDatetimeFormat("1947.03"));
+        assertEquals("1980", CalendarUtils.convertDatetimeFormat("1980"));
+        assertEquals("1969-05", CalendarUtils.convertDatetimeFormat("1969.05?"));
+        assertEquals("Midt af 1900-tallet", CalendarUtils.convertDatetimeFormat("Midt af 1900-tallet"));
+        assertEquals("Ukendt", CalendarUtils.convertDatetimeFormat("Ukendt"));
+        assertEquals("u.å.", CalendarUtils.convertDatetimeFormat("u.å."));
+//        assertEquals("1972 TO 1979", CalendarUtils.convertDatetimeFormat("1972-1979"));
 //        assertEquals("??", CalendarUtils.convertDatetimeFormat("1911-12"));
 //        assertEquals("1897 TO 1898", CalendarUtils.convertDatetimeFormat("1897-98"));
 //        assertEquals("1957", CalendarUtils.convertDatetimeFormat("1957-583/2"));

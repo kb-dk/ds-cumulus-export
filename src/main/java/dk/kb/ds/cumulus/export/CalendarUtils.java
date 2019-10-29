@@ -88,24 +88,25 @@ public class CalendarUtils {
         String[] patternList = {"yyyy-MM-dd", "yyyy-MM", "yyyy"};
         String pattern;
 
-        String gregorianDate = getDateTime("yyyy-MM-dd", datetimeFromCumulus);
+        String gregorianDate = getDateTime(patternList[0], datetimeFromCumulus);
         pattern = patternList[0];
 
         if (gregorianDate.equals(FALSE)){
-            gregorianDate = getDateTime("yyyy.MM.dd", datetimeFromCumulus);
             pattern = patternList[0];
+            gregorianDate = getDateTime("yyyy.MM.dd", datetimeFromCumulus);
         }
         if (gregorianDate.equals(FALSE)){
-            gregorianDate = getDateTime("yyyy.MM", datetimeFromCumulus);
             pattern = patternList[1];
+            gregorianDate = getDateTime("yyyy.MM", datetimeFromCumulus);
         }
-//        if (gregorianDate.equals(FALSE)){
-//            gregorianDate = getDateTime("yyyy-MM", datetimeFromCumulus);
-//            pattern = patternList[1];
-//        }
         if (gregorianDate.equals(FALSE)){
-            gregorianDate = getDateTime("yyyy", datetimeFromCumulus);
+            pattern = patternList[1];
+            gregorianDate = getDateTime(pattern, datetimeFromCumulus);
+
+        }
+        if (gregorianDate.equals(FALSE)){
             pattern = patternList[2];
+            gregorianDate = getDateTime(pattern, datetimeFromCumulus);
         }
         if (gregorianDate.equals(FALSE)){
             return datetimeFromCumulus;
@@ -116,9 +117,12 @@ public class CalendarUtils {
         // Convert to solr date range format
 
         LocalDateTime createdDateFormatted = LocalDateTime.parse(gregorianDate, DateTimeFormatter.ISO_DATE_TIME);
+
         DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern(pattern);
 
-        return createdDateFormatted.format(timeFormatter);
+        final String format = createdDateFormatted.format(timeFormatter);
+
+        return format;
     }
 
 }
