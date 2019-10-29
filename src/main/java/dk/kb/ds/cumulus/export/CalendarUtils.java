@@ -4,6 +4,7 @@ import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.DateTimeException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
@@ -79,27 +80,32 @@ public class CalendarUtils {
     /**
      * Converts gregorian date .
      * @param datetimeFromCumulus The originating date from Cumulus.
-     * @return The date in solr date_range format or text value??
+     * @return The date in solr date_range format or text value ??
      */
 
-    public static String convertDatetimeFormat(String datetimeFromCumulus) {
+    public static String convertDatetimeFormat(String datetimeFromCumulus) throws DateTimeException {
 
-//        String datetimeFromCumulusChecked = datetimeFromCumulus.replaceAll("[^-.?0-9]+", "");
-//        datetimeFromCumulusChecked.
-//        return((datetimeFromCumulusChecked));
-
-//        String[] format = {"yyyy-MM-dd", "yyyy.MM.dd", "yyyy-yyyy"};
+        String[] patternList = {"yyyy-MM-dd", "yyyy-MM", "yyyy"};
+        String pattern;
 
         String gregorianDate = getDateTime("yyyy-MM-dd", datetimeFromCumulus);
+        pattern = patternList[0];
 
-        if (gregorianDate.equals(FALSE))
-            {
+        if (gregorianDate.equals(FALSE)){
             gregorianDate = getDateTime("yyyy.MM.dd", datetimeFromCumulus);
-
+            pattern = patternList[0];
         }
         if (gregorianDate.equals(FALSE)){
             gregorianDate = getDateTime("yyyy.MM", datetimeFromCumulus);
-
+            pattern = patternList[1];
+        }
+        if (gregorianDate.equals(FALSE)){
+            gregorianDate = getDateTime("yyyy-MM", datetimeFromCumulus);
+            pattern = patternList[1];
+        }
+        if (gregorianDate.equals(FALSE)){
+            gregorianDate = getDateTime("yyyy", datetimeFromCumulus);
+            pattern = patternList[2];
         }
         if (gregorianDate.equals(FALSE)){
             return datetimeFromCumulus; //Return the string value of År, i.e. no appropriate date format found
@@ -109,7 +115,7 @@ public class CalendarUtils {
 
 
         LocalDateTime createdDateFormatted = LocalDateTime.parse(gregorianDate, DateTimeFormatter.ISO_DATE_TIME);
-        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern(pattern);
 
         return createdDateFormatted.format(timeFormatter);
 
