@@ -24,6 +24,7 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Properties;
 
 public class CumulusExport {
     // List of valid types
@@ -32,6 +33,12 @@ public class CumulusExport {
     public static void main(String[] args) throws Exception {
 
         try (CumulusServer server = new CumulusServer(Configuration.getCumulusConf())) {
+            Properties exportpro = new Properties();
+
+            exportpro.load(CumulusExport.class.getClassLoader().getResourceAsStream("cumulusExport.properties"));
+            boolean limited = Boolean.parseBoolean(exportpro.getProperty("limited"));
+            int counter = Integer.parseInt(exportpro.getProperty("counter"));
+
             //Select the first Cumulus catalog from the configuration
             String myCatalog = Configuration.getCumulusConf().getCatalogs().get(0);
             CumulusQuery query = CumulusQuery.getQueryForAllInCatalog(myCatalog);
@@ -51,7 +58,7 @@ public class CumulusExport {
             String type = getConfigurationType();
             String image_url = "";
 
-            int counter = 0;
+            int loop_counter = 0;
             for (CumulusRecord record : recordCollection) {
                 Element docElement = document.createElement("doc");
                 rootElement.appendChild(docElement);
@@ -81,9 +88,9 @@ public class CumulusExport {
                         fieldElement.appendChild(document.createTextNode(attributeContent[i]));
                     }
                 }
-                if (counter > 100)
+                loop_counter++;
+                if (limited && (loop_counter >= counter))
                     break;
-                counter++;
             }
             // save the content to xml-file with specific formatting
             TransformerFactory transformerFactory = TransformerFactory.newInstance();
