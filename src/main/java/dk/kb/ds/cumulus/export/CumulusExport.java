@@ -60,7 +60,10 @@ public class CumulusExport {
                 String keyword = record.getFieldValueOrNull("Keywords");
                 String subject = record.getFieldValueOrNull("Note");
                 String license = record.getFieldValueForNonStringField("Copyright");
-                String datetime = record.getFieldValueOrNull("År");  //CalendarUtils.getDateTime("??", record.getFieldValueOrNull("År"));
+
+                String datetimeFromCumulus = record.getFieldValueOrNull("År");  //CalendarUtils.getDateTime("??", record.getFieldValueOrNull("År"));
+                String datetime = CalendarUtils.convertDatetimeFormat(datetimeFromCumulus);; // solr date_range
+
                 String author = record.getFieldValueOrNull("Ophav");
 
 
@@ -90,6 +93,8 @@ public class CumulusExport {
             log.debug("Created " + outputFile + " as input for solr.");
         }
     }
+
+
 
     // Check for valid type
     static String getConfigurationType() {

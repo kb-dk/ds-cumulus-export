@@ -3,8 +3,13 @@ package dk.kb.ds.cumulus.export;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.xml.datatype.DatatypeFactory;
+import javax.xml.datatype.XMLGregorianCalendar;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.DateTimeException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Locale;
@@ -14,9 +19,6 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import javax.xml.datatype.DatatypeFactory;
-import javax.xml.datatype.XMLGregorianCalendar;
 
 /**
  * Utility class for calendar issues.
@@ -29,6 +31,7 @@ public class CalendarUtils {
 
     /** A single instance of the DatatypeFactory to prevent overlap from recreating it too often.*/
     private static DatatypeFactory factory = null;
+    private static final String FALSE = "false";
 
     /**
      * ISO8601 representation with second granularity and Zulu time. Compatible with Solr datetime.
@@ -146,7 +149,6 @@ public class CalendarUtils {
         } catch (Exception e) {
             IllegalStateException res = new IllegalStateException("Could not create XML date for the date '"
                 + date + "'.", e);
-//            ExceptionUtils.insertException(res);
             throw res;
         }
     }
@@ -175,12 +177,60 @@ public class CalendarUtils {
                 Date date2 = formatter2.parse(dateString);
                 return getXmlGregorianCalendar(date2).toString();
             } catch (ParseException e2) {
-                IllegalStateException res = new IllegalStateException("Can neither parse date '" + dateString
-                    + "' in format '" + format + "'. " + "Caught exceptions: " + e + " , " + e2, e2);
-//                ExceptionUtils.insertException(res);
-                throw res;
+                return FALSE;
+//                IllegalStateException res = new IllegalStateException("Cannot parse date '" + dateString
+//                    + "' in format '" + format + "'. " + "Caught exceptions: " + e + " , " + e2, e2);
+//                throw res;
             }
         }
+    }
+
+    /**
+     * Converts gregorian date .
+     * @param datetimeFromCumulus The originating date from Cumulus.
+     * @return The date in solr date_range format or text value ??
+     */
+
+    public static String convertDatetimeFormat(String datetimeFromCumulus) throws DateTimeException {
+
+        String[] patternList = {"yyyy-MM-dd", "yyyy-MM", "yyyy"};
+        String pattern;
+
+        String gregorianDate = getDateTime(patternList[0], datetimeFromCumulus);
+        pattern = patternList[0];
+
+        if (gregorianDate.equals(FALSE)){
+            pattern = patternList[0];
+            gregorianDate = getDateTime("yyyy.MM.dd", datetimeFromCumulus);
+        }
+        if (gregorianDate.equals(FALSE)){
+            pattern = patternList[1];
+            gregorianDate = getDateTime("yyyy.MM", datetimeFromCumulus);
+        }
+        if (gregorianDate.equals(FALSE)){
+            pattern = patternList[1];
+            gregorianDate = getDateTime(pattern, datetimeFromCumulus);
+
+        }
+        if (gregorianDate.equals(FALSE)){
+            pattern = patternList[2];
+            gregorianDate = getDateTime(pattern, datetimeFromCumulus);
+        }
+        if (gregorianDate.equals(FALSE)){
+            return datetimeFromCumulus;
+            //Return the string value of År, i.e. no appropriate date format found
+//            TODO: How should this be handled by solr
+        }
+
+        // Convert to solr date range format
+
+        LocalDateTime createdDateFormatted = LocalDateTime.parse(gregorianDate, DateTimeFormatter.ISO_DATE_TIME);
+
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern(pattern);
+
+        final String format = createdDateFormatted.format(timeFormatter);
+
+        return format;
     }
 
 }
