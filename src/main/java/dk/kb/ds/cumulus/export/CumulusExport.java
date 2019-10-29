@@ -20,10 +20,6 @@ import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 
@@ -60,7 +56,7 @@ public class CumulusExport {
                 // Get  metadata from Cumulus
                 String id = "ds_" + collection + "_" + record.getFieldValueOrNull("guid");
                 String title = record.getFieldValueOrNull("Titel");
-                String created_date = getUTCTime(record.getFieldValueForNonStringField("Item Creation Date"));
+                String created_date = CalendarUtils.getUTCTime(record.getFieldValueForNonStringField("Item Creation Date"));
                 String keyword = record.getFieldValueOrNull("Keywords");
                 String subject = record.getFieldValueOrNull("Note");
                 String license = record.getFieldValueForNonStringField("Copyright");
@@ -111,12 +107,4 @@ public class CumulusExport {
             .replaceAll("\\s","_");
     }
 
-    static String getUTCTime(String createdDate) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("ccc LLL dd HH:mm:ss zzz yyy");
-        LocalDateTime createdDateFormatted = LocalDateTime.parse(createdDate, formatter);
-        LocalDateTime createdDateUTC = createdDateFormatted.atZone(ZoneId.of("Europe/Copenhagen"))
-            .withZoneSameInstant(ZoneOffset.UTC).toLocalDateTime();
-        DateTimeFormatter isoTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
-        return createdDateUTC.format(isoTimeFormatter);
-    }
 }
