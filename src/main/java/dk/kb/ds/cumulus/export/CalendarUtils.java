@@ -118,10 +118,6 @@ public class CalendarUtils {
         DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern(pattern);
 
         return createdDateFormatted.format(timeFormatter);
-
-//        return createdDateFormatted.toString();
-
-
     }
 
 }
