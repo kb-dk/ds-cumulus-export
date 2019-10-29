@@ -99,20 +99,21 @@ public class CalendarUtils {
             gregorianDate = getDateTime("yyyy.MM", datetimeFromCumulus);
             pattern = patternList[1];
         }
-        if (gregorianDate.equals(FALSE)){
-            gregorianDate = getDateTime("yyyy-MM", datetimeFromCumulus);
-            pattern = patternList[1];
-        }
+//        if (gregorianDate.equals(FALSE)){
+//            gregorianDate = getDateTime("yyyy-MM", datetimeFromCumulus);
+//            pattern = patternList[1];
+//        }
         if (gregorianDate.equals(FALSE)){
             gregorianDate = getDateTime("yyyy", datetimeFromCumulus);
             pattern = patternList[2];
         }
         if (gregorianDate.equals(FALSE)){
-            return datetimeFromCumulus; //Return the string value of År, i.e. no appropriate date format found
+            return datetimeFromCumulus;
+            //Return the string value of År, i.e. no appropriate date format found
+//            TODO: How should this be handled by solr
         }
 
         // Convert to solr date range format
-
 
         LocalDateTime createdDateFormatted = LocalDateTime.parse(gregorianDate, DateTimeFormatter.ISO_DATE_TIME);
         DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern(pattern);
