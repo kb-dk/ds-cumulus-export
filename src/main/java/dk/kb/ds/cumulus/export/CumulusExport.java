@@ -24,6 +24,7 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Properties;
 
 public class CumulusExport {
     // List of valid types
@@ -32,6 +33,12 @@ public class CumulusExport {
     public static void main(String[] args) throws Exception {
 
         try (CumulusServer server = new CumulusServer(Configuration.getCumulusConf())) {
+            Properties exportpro = new Properties();
+
+            exportpro.load(CumulusExport.class.getClassLoader().getResourceAsStream("cumulusExport.properties"));
+            boolean limited = Boolean.parseBoolean(exportpro.getProperty("limited"));
+            int counter = Integer.parseInt(exportpro.getProperty("counter"));
+
             //Select the first Cumulus catalog from the configuration
             String myCatalog = Configuration.getCumulusConf().getCatalogs().get(0);
             CumulusQuery query = CumulusQuery.getQueryForAllInCatalog(myCatalog);
@@ -49,6 +56,9 @@ public class CumulusExport {
             // Get configurations
             String collection = convertCollectionToSolrFormat(Configuration.getCollection().toString()) ;
             String type = getConfigurationType();
+            String image_url = "";
+
+            int loop_counter = 0;
             for (CumulusRecord record : recordCollection) {
                 Element docElement = document.createElement("doc");
                 rootElement.appendChild(docElement);
@@ -61,9 +71,13 @@ public class CumulusExport {
                 String keyword = record.getFieldValueOrNull("Categories");
                 String subject = record.getFieldValueOrNull("Emneord");
                 String license = record.getFieldValueOrNull("Copyright Notice");
+                String url = record.getAssetReference("Asset Reference").getPart(0).getDisplayString();
 
-                String[] attributeContent = {id, collection, type, title, created_date, keyword, subject, license};
-                String[] attributeName = {"id", "collection", "type", "title", "created_date", "keyword", "subject", "license"};
+                if (url != null || url != "")
+                    image_url = ImageUrl.makeUrl(url);
+
+                String[] attributeContent = {id, collection, type, title, created_date, keyword, subject, license, image_url};
+                String[] attributeName = {"id", "collection", "type", "title", "created_date", "keyword", "subject", "license", "image_url"};
 
                 //Add the fields above to xml-file
                 for (int i = 0; i < attributeName.length; i++) {
@@ -74,6 +88,9 @@ public class CumulusExport {
                         fieldElement.appendChild(document.createTextNode(attributeContent[i]));
                     }
                 }
+                loop_counter++;
+                if (limited && (loop_counter >= counter))
+                    break;
             }
             // save the content to xml-file with specific formatting
             TransformerFactory transformerFactory = TransformerFactory.newInstance();
