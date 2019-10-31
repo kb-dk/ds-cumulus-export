@@ -69,22 +69,23 @@ public class CumulusExport {
                 String id = "ds_" + collection + "_" + record.getFieldValueOrNull("guid");
                 String title = record.getFieldValueOrNull("Titel");
                 String creationDate = record.getFieldValueForNonStringField("Item Creation Date");
-                String created_date = getUTCTime(creationDate);
+                String created_date = CalendarUtils.getUTCTime(creationDate);
+                if (created_date == null){
+                    created_date_verbatim = creationDate;
+                }
                 String keyword = record.getFieldValueOrNull("Categories");
                 String subject = record.getFieldValueOrNull("Emneord");
                 String license = record.getFieldValueOrNull("Copyright Notice");
                 String url = record.getAssetReference("Asset Reference").getPart(0).getDisplayString();
-                if (url != null || url != "")
+                if (url != null || url != "") {
                     image_url = ImageUrl.makeUrl(url);
-
+                }
                 String datetimeFromCumulus = record.getFieldValueOrNull("År");
                 String datetime = CalendarUtils.getUTCTime(datetimeFromCumulus);
                 if (datetime == null) {
                     datetime_verbatim = datetimeFromCumulus;
                 }
-
                 String author = record.getFieldValueOrNull("Ophav");
-
 
                 String[] attributeContent = {id, collection, type, title, created_date, created_date_verbatim, keyword, subject, license, image_url,
                     datetime, datetime_verbatim, author};
