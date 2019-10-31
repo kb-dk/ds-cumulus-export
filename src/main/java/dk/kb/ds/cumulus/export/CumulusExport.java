@@ -22,6 +22,7 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Properties;
 
 public class CumulusExport {
     // List of valid types
@@ -32,6 +33,12 @@ public class CumulusExport {
     public static void main(String[] args) throws Exception {
 
         try (CumulusServer server = new CumulusServer(Configuration.getCumulusConf())) {
+            Properties exportpro = new Properties();
+
+            exportpro.load(CumulusExport.class.getClassLoader().getResourceAsStream("cumulusExport.properties"));
+            boolean limited = Boolean.parseBoolean(exportpro.getProperty("limited"));
+            int counter = Integer.parseInt(exportpro.getProperty("counter"));
+
             //Select the first Cumulus catalog from the configuration
             String myCatalog = Configuration.getCumulusConf().getCatalogs().get(0);
             CumulusQuery query = CumulusQuery.getQueryForAllInCatalog(myCatalog);
@@ -51,6 +58,9 @@ public class CumulusExport {
             String type = getConfigurationType();
             String created_date_verbatim = null;
             String datetime_verbatim = null;
+            String image_url = "";
+
+            int loop_counter = 0;
             for (CumulusRecord record : recordCollection) {
                 Element docElement = document.createElement("doc");
                 rootElement.appendChild(docElement);
@@ -58,14 +68,14 @@ public class CumulusExport {
                 // Get  metadata from Cumulus
                 String id = "ds_" + collection + "_" + record.getFieldValueOrNull("guid");
                 String title = record.getFieldValueOrNull("Titel");
-                String createdDateFromCumulus = record.getFieldValueForNonStringField("Item Creation Date");
-                String created_date = CalendarUtils.getUTCTime(createdDateFromCumulus);
-                if (created_date == null){
-                     created_date_verbatim = createdDateFromCumulus;
-                }
-                String keyword = record.getFieldValueOrNull("Keywords");
-                String subject = record.getFieldValueOrNull("Note");
-                String license = record.getFieldValueForNonStringField("Copyright");
+                String creationDate = record.getFieldValueForNonStringField("Item Creation Date");
+                String created_date = getUTCTime(creationDate);
+                String keyword = record.getFieldValueOrNull("Categories");
+                String subject = record.getFieldValueOrNull("Emneord");
+                String license = record.getFieldValueOrNull("Copyright Notice");
+                String url = record.getAssetReference("Asset Reference").getPart(0).getDisplayString();
+                if (url != null || url != "")
+                    image_url = ImageUrl.makeUrl(url);
 
                 String datetimeFromCumulus = record.getFieldValueOrNull("År");
                 String datetime = CalendarUtils.getUTCTime(datetimeFromCumulus);
@@ -76,9 +86,9 @@ public class CumulusExport {
                 String author = record.getFieldValueOrNull("Ophav");
 
 
-                String[] attributeContent = {id, collection, type, title, created_date, created_date_verbatim, keyword, subject, license,
+                String[] attributeContent = {id, collection, type, title, created_date, created_date_verbatim, keyword, subject, license, image_url,
                     datetime, datetime_verbatim, author};
-                String[] attributeName = {"id", "collection", "type", "title", "created_date", "created_date_verbatim", "keyword", "subject", "license",
+                String[] attributeName = {"id", "collection", "type", "title", "created_date", "created_date_verbatim", "keyword", "subject", "license", "image_url",
                     "datetime", "datetime_verbatim", "author"};
 
                 //Add the fields above to xml-file
@@ -90,6 +100,9 @@ public class CumulusExport {
                         fieldElement.appendChild(document.createTextNode(attributeContent[i]));
                     }
                 }
+                loop_counter++;
+                if (limited && (loop_counter >= counter))
+                    break;
             }
             // save the content to xml-file with specific formatting
             TransformerFactory transformerFactory = TransformerFactory.newInstance();
