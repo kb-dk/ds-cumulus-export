@@ -7,16 +7,13 @@ import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.DateTimeException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.Locale;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -61,8 +58,8 @@ public class CalendarUtils {
         String parsed;
         if ((parsed = parseFullWritten(datetime)) != null ||
             (parsed = parseYear(datetime)) != null ||
-            (parsed = parseYearMonth(datetime)) != null
-            // (parsed = parseWithAnotherMethod(datetime)) != null // TODO: Extend here
+            (parsed = parseYearMonth(datetime)) != null ||
+            (parsed = parseYearMonthDay(datetime)) != null
             ) {
             return ensurePadding(parsed, padToSeconds);
         }
@@ -131,6 +128,23 @@ public class CalendarUtils {
         return null;
     }
 
+    private final static Pattern YEAR_MONTH_DAY_PATTERN = Pattern.compile("^([0-9]{4}).([0-9]{2}).([0-9]{2})$");
+    /**
+     * Parses inputs consisting of exactly 4 digits (year), a non-digit character, 2 digits (month), a non-digit character
+     * and 2 digits (day).
+     * @param datetime year.month.day, e.g. '2019-10-31'.
+     * @return Truncated ISO-8601 representation of the given datetime if possible, else null.
+     */
+    private static String parseYearMonthDay(String datetime) {
+        Matcher ymdMatcher = YEAR_MONTH_DAY_PATTERN.matcher(datetime);
+        if (ymdMatcher.matches()) {
+            return ymdMatcher.group(1)
+                + "-" + ymdMatcher.group(2)
+                + "-" + ymdMatcher.group(3);
+        }
+        log.trace("parseYearMonthDay({}) failed parsing", datetime);
+        return null;
+    }
     /**
      * Turns a date into a XMLGregorianCalendar.
      *
@@ -177,60 +191,11 @@ public class CalendarUtils {
                 Date date2 = formatter2.parse(dateString);
                 return getXmlGregorianCalendar(date2).toString();
             } catch (ParseException e2) {
-                return FALSE;
-//                IllegalStateException res = new IllegalStateException("Cannot parse date '" + dateString
-//                    + "' in format '" + format + "'. " + "Caught exceptions: " + e + " , " + e2, e2);
-//                throw res;
+//                return FALSE;
+                IllegalStateException res = new IllegalStateException("Cannot parse date '" + dateString
+                    + "' in format '" + format + "'. " + "Caught exceptions: " + e + " , " + e2, e2);
+                throw res;
             }
         }
     }
-
-    /**
-     * Converts gregorian date .
-     * @param datetimeFromCumulus The originating date from Cumulus.
-     * @return The date in solr date_range format or text value ??
-     */
-
-    public static String convertDatetimeFormat(String datetimeFromCumulus) throws DateTimeException {
-
-        String[] patternList = {"yyyy-MM-dd", "yyyy-MM", "yyyy"};
-        String pattern;
-
-        String gregorianDate = getDateTime(patternList[0], datetimeFromCumulus);
-        pattern = patternList[0];
-
-        if (gregorianDate.equals(FALSE)){
-            pattern = patternList[0];
-            gregorianDate = getDateTime("yyyy.MM.dd", datetimeFromCumulus);
-        }
-        if (gregorianDate.equals(FALSE)){
-            pattern = patternList[1];
-            gregorianDate = getDateTime("yyyy.MM", datetimeFromCumulus);
-        }
-        if (gregorianDate.equals(FALSE)){
-            pattern = patternList[1];
-            gregorianDate = getDateTime(pattern, datetimeFromCumulus);
-
-        }
-        if (gregorianDate.equals(FALSE)){
-            pattern = patternList[2];
-            gregorianDate = getDateTime(pattern, datetimeFromCumulus);
-        }
-        if (gregorianDate.equals(FALSE)){
-            return datetimeFromCumulus;
-            //Return the string value of År, i.e. no appropriate date format found
-//            TODO: How should this be handled by solr
-        }
-
-        // Convert to solr date range format
-
-        LocalDateTime createdDateFormatted = LocalDateTime.parse(gregorianDate, DateTimeFormatter.ISO_DATE_TIME);
-
-        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern(pattern);
-
-        final String format = createdDateFormatted.format(timeFormatter);
-
-        return format;
-    }
-
 }

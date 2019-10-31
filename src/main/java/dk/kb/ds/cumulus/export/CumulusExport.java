@@ -49,6 +49,8 @@ public class CumulusExport {
             // Get configurations
             String collection = convertCollectionToSolrFormat(Configuration.getCollection().toString()) ;
             String type = getConfigurationType();
+            String created_date_verbatim = null;
+            String datetime_verbatim = null;
             for (CumulusRecord record : recordCollection) {
                 Element docElement = document.createElement("doc");
                 rootElement.appendChild(docElement);
@@ -56,21 +58,28 @@ public class CumulusExport {
                 // Get  metadata from Cumulus
                 String id = "ds_" + collection + "_" + record.getFieldValueOrNull("guid");
                 String title = record.getFieldValueOrNull("Titel");
-                String created_date = CalendarUtils.getUTCTime(record.getFieldValueForNonStringField("Item Creation Date"));
+                String createdDateFromCumulus = record.getFieldValueForNonStringField("Item Creation Date");
+                String created_date = CalendarUtils.getUTCTime(createdDateFromCumulus);
+                if (created_date == null){
+                     created_date_verbatim = createdDateFromCumulus;
+                }
                 String keyword = record.getFieldValueOrNull("Keywords");
                 String subject = record.getFieldValueOrNull("Note");
                 String license = record.getFieldValueForNonStringField("Copyright");
 
-                String datetimeFromCumulus = record.getFieldValueOrNull("År");  //CalendarUtils.getDateTime("??", record.getFieldValueOrNull("År"));
-                String datetime = CalendarUtils.convertDatetimeFormat(datetimeFromCumulus);; // solr date_range
+                String datetimeFromCumulus = record.getFieldValueOrNull("År");
+                String datetime = CalendarUtils.getUTCTime(datetimeFromCumulus);
+                if (datetime == null) {
+                    datetime_verbatim = datetimeFromCumulus;
+                }
 
                 String author = record.getFieldValueOrNull("Ophav");
 
 
-                String[] attributeContent = {id, collection, type, title, created_date, keyword, subject, license,
-                    datetime, author};
-                String[] attributeName = {"id", "collection", "type", "title", "created_date", "keyword", "subject", "license",
-                    "datetime", "author"};
+                String[] attributeContent = {id, collection, type, title, created_date, created_date_verbatim, keyword, subject, license,
+                    datetime, datetime_verbatim, author};
+                String[] attributeName = {"id", "collection", "type", "title", "created_date", "created_date_verbatim", "keyword", "subject", "license",
+                    "datetime", "datetime_verbatim", "author"};
 
                 //Add the fields above to xml-file
                 for (int i = 0; i < attributeName.length; i++) {
