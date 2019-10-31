@@ -59,7 +59,8 @@ public class CalendarUtils {
         if ((parsed = parseFullWritten(datetime)) != null ||
             (parsed = parseYear(datetime)) != null ||
             (parsed = parseYearMonth(datetime)) != null ||
-            (parsed = parseYearMonthDay(datetime)) != null
+            (parsed = parseYearMonthDay(datetime)) != null ||
+            (parsed = parseYearToYear(datetime)) != null
             ) {
             return ensurePadding(parsed, padToSeconds);
         }
@@ -145,6 +146,23 @@ public class CalendarUtils {
         log.trace("parseYearMonthDay({}) failed parsing", datetime);
         return null;
     }
+
+    private final static Pattern YEAR_TO_YEAR = Pattern.compile("^([0-9]{4}).([0-9]{4})$");
+    /**
+     * Parses inputs consisting of exactly 4 digits (year), a non-digit character, 4 digits (year).
+     * @param datetime year-year, e.g. '2019-2020'.
+     * @return Truncated ISO-8601 representation of the given datetime if possible, else null.
+     */
+    private static String parseYearToYear(String datetime) {
+        Matcher yyMatcher = YEAR_TO_YEAR.matcher(datetime);
+        if (yyMatcher.matches()) {
+            return yyMatcher.group(1)
+                + "-" + yyMatcher.group(2);
+        }
+        log.trace("parseYearMonthDay({}) failed parsing", datetime);
+        return null;
+    }
+
     /**
      * Turns a date into a XMLGregorianCalendar.
      *

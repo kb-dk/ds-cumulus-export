@@ -22,8 +22,7 @@ public class CumulusExportTest {
 
     @Test
     public void testGetConfigurationType() {
-        // How to make test data for config type?
-//        String configType = CumulusExport.getConfigurationType();
-//        assertEquals("image", configType);
+        String configType = CumulusExport.getConfigurationType();
+        assertEquals("image", configType);
     }
 }

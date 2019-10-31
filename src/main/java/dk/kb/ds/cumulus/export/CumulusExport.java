@@ -68,39 +68,46 @@ public class CumulusExport {
                 // Get  metadata from Cumulus
                 String id = "ds_" + collection + "_" + record.getFieldValueOrNull("guid");
                 String title = record.getFieldValueOrNull("Titel");
-                String creationDate = record.getFieldValueForNonStringField("Item Creation Date");
-                String created_date = CalendarUtils.getUTCTime(creationDate);
-                if (created_date == null){
-                    created_date_verbatim = creationDate;
-                }
+                String creationDateFromCumulus = record.getFieldValueForNonStringField("Item Creation Date");
+                String created_date = CalendarUtils.getUTCTime(creationDateFromCumulus);
+                created_date_verbatim = getString(created_date_verbatim, creationDateFromCumulus, created_date == null);
                 String keyword = record.getFieldValueOrNull("Categories");
                 String subject = record.getFieldValueOrNull("Emneord");
-                String license = record.getFieldValueOrNull("Copyright Notice");
+                String license = record.getFieldValueForNonStringField("Copyright");
                 String url = record.getAssetReference("Asset Reference").getPart(0).getDisplayString();
                 if (url != null || url != "") {
                     image_url = ImageUrl.makeUrl(url);
                 }
                 String datetimeFromCumulus = record.getFieldValueOrNull("År");
                 String datetime = CalendarUtils.getUTCTime(datetimeFromCumulus);
-                if (datetime == null) {
-                    datetime_verbatim = datetimeFromCumulus;
-                }
+                datetime_verbatim = getString(datetime_verbatim, datetimeFromCumulus, datetime == null);
                 String author = record.getFieldValueOrNull("Ophav");
 
-                String[] attributeContent = {id, collection, type, title, created_date, created_date_verbatim, keyword, subject, license, image_url,
-                    datetime, datetime_verbatim, author};
-                String[] attributeName = {"id", "collection", "type", "title", "created_date", "created_date_verbatim", "keyword", "subject", "license", "image_url",
-                    "datetime", "datetime_verbatim", "author"};
-
-                //Add the fields above to xml-file
-                for (int i = 0; i < attributeName.length; i++) {
-                    if (attributeContent[i] != null) {
+                final String[][] ATTRIBUTES = new String[][]{
+                    {id, "id"},
+                    {collection, "collection"},
+                    {type, "type"},
+                    {title, "title"},
+                    {created_date, "created_date"},
+                    {created_date_verbatim, "created_date_verbatim"},
+                    {keyword, "keyword"},
+                    {subject, "subject"},
+                    {license, "license"},
+                    {image_url, "image_url"},
+                    {datetime, "datetime"},
+                    {datetime_verbatim, "datetime_verbatim"},
+                    {author, "author"}
+                };
+                //Add  attributes to xml-file
+                for ( String[] attributes : ATTRIBUTES){
+                    if (attributes[0] != null){
                         Element fieldElement = document.createElement("field");
-                        fieldElement.setAttribute("name", attributeName[i]);
+                        fieldElement.setAttribute("name", attributes[1]);
                         docElement.appendChild(fieldElement);
-                        fieldElement.appendChild(document.createTextNode(attributeContent[i]));
+                        fieldElement.appendChild(document.createTextNode(attributes[0]));
                     }
                 }
+                // TODO: remember to set limited to false in production
                 loop_counter++;
                 if (limited && (loop_counter >= counter))
                     break;
@@ -117,6 +124,12 @@ public class CumulusExport {
         }
     }
 
+    private static String getString(String verbatim_value, String originalCumulusValue, boolean b) {
+        if (b) {
+            verbatim_value = originalCumulusValue;
+        }
+        return verbatim_value;
+    }
 
 
     // Check for valid type
