@@ -157,9 +157,9 @@ public class CalendarUtils {
         Matcher yyMatcher = YEAR_TO_YEAR.matcher(datetime);
         if (yyMatcher.matches()) {
             return yyMatcher.group(1)
-                + "-" + yyMatcher.group(2);
+                + " TO " + yyMatcher.group(2);
         }
-        log.trace("parseYearMonthDay({}) failed parsing", datetime);
+        log.trace("parseYearToYear({}) failed parsing", datetime);
         return null;
     }
 
