@@ -5,6 +5,8 @@ import dk.kb.cumulus.CumulusRecord;
 import dk.kb.cumulus.CumulusRecordCollection;
 import dk.kb.cumulus.CumulusServer;
 import dk.kb.cumulus.utils.ArgumentCheck;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -18,10 +20,6 @@ import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
@@ -29,6 +27,8 @@ import java.util.Properties;
 public class CumulusExport {
     // List of valid types
     private static List<String> listOfType = Arrays.asList("image", "moving_image", "sound", "text", "other");
+
+    private static final Logger log = LoggerFactory.getLogger(CumulusExport.class);
 
     public static void main(String[] args) throws Exception {
 
@@ -56,6 +56,8 @@ public class CumulusExport {
             // Get configurations
             String collection = convertCollectionToSolrFormat(Configuration.getCollection().toString()) ;
             String type = getConfigurationType();
+            String created_date_verbatim = null;
+            String datetime_verbatim = null;
             String image_url = "";
 
             int loop_counter = 0;
@@ -66,28 +68,46 @@ public class CumulusExport {
                 // Get  metadata from Cumulus
                 String id = "ds_" + collection + "_" + record.getFieldValueOrNull("guid");
                 String title = record.getFieldValueOrNull("Titel");
-                String creationDate = record.getFieldValueForNonStringField("Item Creation Date");
-                String created_date = getUTCTime(creationDate);
+                String creationDateFromCumulus = record.getFieldValueForNonStringField("Item Creation Date");
+                String created_date = CalendarUtils.getUTCTime(creationDateFromCumulus);
+                created_date_verbatim = getFallbackString(created_date_verbatim, creationDateFromCumulus, created_date);
                 String keyword = record.getFieldValueOrNull("Categories");
                 String subject = record.getFieldValueOrNull("Emneord");
-                String license = record.getFieldValueOrNull("Copyright Notice");
+                String license = record.getFieldValueForNonStringField("Copyright");
                 String url = record.getAssetReference("Asset Reference").getPart(0).getDisplayString();
-
-                if (url != null || url != "")
+                if (url != null || url != "") {
                     image_url = ImageUrl.makeUrl(url);
+                }
+                String datetimeFromCumulus = record.getFieldValueOrNull("År");
+                String datetime = CalendarUtils.getUTCTime(datetimeFromCumulus, false);
+                datetime_verbatim = getFallbackString(datetime_verbatim, datetimeFromCumulus, datetime);
+                String author = record.getFieldValueOrNull("Ophav");
 
-                String[] attributeContent = {id, collection, type, title, created_date, keyword, subject, license, image_url};
-                String[] attributeName = {"id", "collection", "type", "title", "created_date", "keyword", "subject", "license", "image_url"};
-
-                //Add the fields above to xml-file
-                for (int i = 0; i < attributeName.length; i++) {
-                    if (attributeContent[i] != null) {
+                final String[][] ATTRIBUTES = new String[][]{
+                    {id, "id"},
+                    {collection, "collection"},
+                    {type, "type"},
+                    {title, "title"},
+                    {created_date, "created_date"},
+                    {created_date_verbatim, "created_date_verbatim"},
+                    {keyword, "keyword"},
+                    {subject, "subject"},
+                    {license, "license"},
+                    {image_url, "image_url"},
+                    {datetime, "datetime"},
+                    {datetime_verbatim, "datetime_verbatim"},
+                    {author, "author"}
+                };
+                //Add  attributes to xml-file
+                for ( String[] attributes : ATTRIBUTES){
+                    if (attributes[0] != null){
                         Element fieldElement = document.createElement("field");
-                        fieldElement.setAttribute("name", attributeName[i]);
+                        fieldElement.setAttribute("name", attributes[1]);
                         docElement.appendChild(fieldElement);
-                        fieldElement.appendChild(document.createTextNode(attributeContent[i]));
+                        fieldElement.appendChild(document.createTextNode(attributes[0]));
                     }
                 }
+                // TODO: remember to set limited to false in production
                 loop_counter++;
                 if (limited && (loop_counter >= counter))
                     break;
@@ -100,8 +120,17 @@ public class CumulusExport {
             DOMSource source = new DOMSource(document);
             StreamResult result = new StreamResult(out);
             transformer.transform(source, result);
+            log.debug("Created " + outputFile + " as input for solr.");
         }
     }
+
+    private static String getFallbackString(String fallbackString, String str, String calcTime) {
+        if (calcTime == null) {
+            fallbackString = str;
+        }
+        return fallbackString;
+    }
+
 
     // Check for valid type
     static String getConfigurationType() {
@@ -113,17 +142,10 @@ public class CumulusExport {
     }
 
     // Remove special chars and replace space with underscore
-    static String convertCollectionToSolrFormat(String toString) {
-        String tmp = toString.replaceAll("[^\\p{L}\\p{Z}]","");
-        return tmp.replaceAll("\\s","_");
+    static String convertCollectionToSolrFormat(String toSolr) {
+        return toSolr
+            .replaceAll("[^\\p{L}\\p{Z}]","")
+            .replaceAll("\\s","_");
     }
 
-    static String getUTCTime(String createdDate) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("ccc LLL dd HH:mm:ss zzz yyy");
-        LocalDateTime createdDateFormatted = LocalDateTime.parse(createdDate, formatter);
-        LocalDateTime createdDateUTC = createdDateFormatted.atZone(ZoneId.of("Europe/Copenhagen"))
-            .withZoneSameInstant(ZoneOffset.UTC).toLocalDateTime();
-        DateTimeFormatter isoTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
-        return createdDateUTC.format(isoTimeFormatter);
-    }
 }
