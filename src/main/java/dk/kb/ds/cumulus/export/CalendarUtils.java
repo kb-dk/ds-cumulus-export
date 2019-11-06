@@ -68,6 +68,17 @@ public class CalendarUtils {
         return null;
     }
 
+    private final static Pattern RANGE_PATTERN = Pattern.compile(".* TO .*");
+    /**
+     * Checks if input has " TO " i.e. is a solr date_range value.
+     * @param str  a parsed date value.
+     * @return true/false.
+     */
+    private static boolean isRangeFormat(String str){
+         Matcher rangeMatcher = RANGE_PATTERN.matcher(str);
+         return rangeMatcher.matches();
+    }
+
     private static final String PADDING = "0000-01-01T00:00:00Z";
     /**
      * Pads a given input to second granularity and with Zulu time designation.
@@ -76,7 +87,7 @@ public class CalendarUtils {
      * @return datetime padded as requested.
      */
     private static String ensurePadding(String datetime, boolean padToSeconds) {
-        if (!padToSeconds) {
+        if (!padToSeconds || isRangeFormat(datetime)) {
             return datetime;
         }
         return datetime + PADDING.substring(datetime.length());
