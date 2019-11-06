@@ -79,7 +79,7 @@ public class CumulusExport {
                     image_url = ImageUrl.makeUrl(url);
                 }
                 String datetimeFromCumulus = record.getFieldValueOrNull("År");
-                String datetime = CalendarUtils.getUTCTime(datetimeFromCumulus, false);
+                String datetime = CalendarUtils.getUTCTime(datetimeFromCumulus);
                 datetime_verbatim = getFallbackString(datetime_verbatim, datetimeFromCumulus, datetime);
                 String author = record.getFieldValueOrNull("Ophav");
 
