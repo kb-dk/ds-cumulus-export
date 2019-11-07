@@ -18,12 +18,8 @@ import dk.kb.cumulus.config.CumulusConfiguration;
 import dk.kb.cumulus.utils.ArgumentCheck;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.yaml.snakeyaml.Yaml;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -72,77 +68,44 @@ public class Configuration {
     protected static final boolean CUMULUS_WRITE_ACCESS = false;
 
     private static Configuration instance = null;
-    private LinkedHashMap<String, Object> confMap = null;
+    private YAML confMap;
     /** The configuration for Cumulus.*/
     protected final CumulusConfiguration cumulusConf;
-    private final Object outputFile;
-    private final Object collection;
-    private final Object type;
+    private final String outputFile;
+    private final String collection;
+    private final String type;
     /**
      * Loads the DS Cumulus Export YAML configuration file from classpath or user home.
      * @throws IOException is the configuration could not be located or retrieved.
      */
     private Configuration() throws IOException {
+        confMap = YAML.resolveConfig(DEFAULT_CONF_FILE, CONF_ROOT);
 
-        // TODO: This should be changed to use JNDI
-        log.debug("Looking for '" + DEFAULT_CONF_FILE + "' on the classpath");
-        URL configURL = Thread.currentThread().getContextClassLoader().getResource(DEFAULT_CONF_FILE);
-        if (configURL ==  null) {
-            log.debug("Looking for '" + DEFAULT_CONF_FILE + "' on the user home path");
-            Path configPath = Path.of(System.getProperty("user.home"), DEFAULT_CONF_FILE);
-            if (!configPath.toFile().exists()) {
-                String message = "Unable to locate '" + DEFAULT_CONF_FILE + "' on the classpath or in user.home, " +
-                                 "unable to continue";
-                log.error(message);
-                throw new IOException(message);
-            }
-            configURL = configPath.toUri().toURL();
-        }
+        this.cumulusConf = loadCumulusConfiguration(confMap.getSubMap(CONF_CUMULUS));
 
-        Object raw;
-        try (InputStream configStream = configURL.openStream()) {
-            raw = new Yaml().load(configStream);
-            if(!(raw instanceof LinkedHashMap)) {
-                throw new IllegalArgumentException("The config resource '" + configURL
-                        + "' does not contain a valid DS Cumulus Export configuration.");
-            }
-        } catch (IOException e) {
-            throw new IOException(
-                "Exception trying to load the DS Cumulus Export configuration from '" + configURL + "'");
-        }
-
-        LinkedHashMap<String, Object> rootMap = (LinkedHashMap<String, Object>) raw;
-
-        ArgumentCheck.checkTrue(rootMap.containsKey(CONF_ROOT),
-                                "Configuration must contain the '" + CONF_ROOT + "' element.");
-
-        confMap = (LinkedHashMap<String, Object>) rootMap.get(CONF_ROOT);
-
-        this.cumulusConf = loadCumulusConfiguration((Map<String, Object>) confMap.get(CONF_CUMULUS));
-
-        this.collection = getObject(confMap, CONF_CUMULUS_COLLECTION);
-        this.outputFile = getObject(confMap, CONF_OUTPUT_FILE);
-        this.type = getObject(confMap, CONF_TYPE);
+        this.collection = getString(confMap, CONF_CUMULUS_COLLECTION);
+        this.outputFile = getString(confMap, CONF_OUTPUT_FILE);
+        this.type = getString(confMap, CONF_TYPE);
     }
 
-    private Object getObject(LinkedHashMap<String, Object> map, String confElement) {
+    private String getString(YAML map, String confElement) {
         ArgumentCheck.checkTrue(map.containsKey(confElement), "Missing configuration element '" + confElement + "'");
         log.info("Processing configuration element '" + confElement + "'");
-        return map.get(confElement);
+        return map.getString(confElement);
     }
 
     public static CumulusConfiguration getCumulusConf() {
         return instance().cumulusConf;
     }
 
-    public static Object getCollection(){
+    public static String getCollection(){
         return instance().collection;
     }
-    public static Object getOutputFile(){
+    public static String getOutputFile(){
         return instance().outputFile;
     }
 
-    public static Object getType(){
+    public static String getType(){
         return instance().type;
     }
 
@@ -165,17 +128,17 @@ public class Configuration {
      * @param map The map with the Cumulus configuration elements.
      * @return The Cumulus configuration.
      */
-    protected CumulusConfiguration loadCumulusConfiguration(Map<String, Object> map) {
+    protected CumulusConfiguration loadCumulusConfiguration(YAML map) {
         for (String element: new String[]{
             CONF_CUMULUS_SERVER, CONF_CUMULUS_USERNAME, CONF_CUMULUS_PASSWORD, CONF_CUMULUS_CATALOG}) {
             ArgumentCheck.checkTrue(map.containsKey(element), "Missing Cumulus element '" + element + "'");
         }
 
         return new CumulusConfiguration(
-            CUMULUS_WRITE_ACCESS, (
-            String) map.get(CONF_CUMULUS_SERVER),
-            (String) map.get(CONF_CUMULUS_USERNAME),
-            (String) map.get(CONF_CUMULUS_PASSWORD),
-            (List<String>) map.get(CONF_CUMULUS_CATALOG));
+            CUMULUS_WRITE_ACCESS,
+            map.getString(CONF_CUMULUS_SERVER),
+            map.getString(CONF_CUMULUS_USERNAME),
+            map.getString(CONF_CUMULUS_PASSWORD),
+            map.getList(CONF_CUMULUS_CATALOG));
     }
 }

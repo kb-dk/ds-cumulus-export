@@ -44,7 +44,7 @@ public class CumulusExport {
             CumulusQuery query = CumulusQuery.getQueryForAllInCatalog(myCatalog);
             CumulusRecordCollection recordCollection = server.getItems(myCatalog, query);
 
-            File outputFile = new File(Configuration.getOutputFile().toString());
+            File outputFile = new File(Configuration.getOutputFile());
             OutputStream out = new FileOutputStream(outputFile);
             ArgumentCheck.checkNotNull(out, "OutputStream out");
             DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
@@ -54,7 +54,7 @@ public class CumulusExport {
             Element rootElement = document.createElement("add");
             document.appendChild(rootElement);
             // Get configurations
-            String collection = convertCollectionToSolrFormat(Configuration.getCollection().toString()) ;
+            String collection = convertCollectionToSolrFormat(Configuration.getCollection()) ;
             String type = getConfigurationType();
             String created_date_verbatim = null;
             String datetime_verbatim = null;
