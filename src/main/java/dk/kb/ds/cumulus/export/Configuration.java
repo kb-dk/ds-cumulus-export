@@ -109,6 +109,13 @@ public class Configuration {
         return instance().type;
     }
 
+    /**
+     * @return the underlying map holding the configuration.
+     */
+    public static YAML getYAML() {
+        return instance().confMap;
+    }
+
     public static synchronized Configuration instance() {
         if (instance == null) {
             try {

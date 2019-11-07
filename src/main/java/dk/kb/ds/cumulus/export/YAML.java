@@ -27,6 +27,7 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Wrapper for SnakeYAML output for easier access to the YAML elements.
@@ -98,10 +99,37 @@ public class YAML extends LinkedHashMap<String, Object> {
     }
 
     /**
+     * Resolves the list of sub YAMLs at the given path in the YAML. Supports {@code .} for path separation,
+     * Sample path: foo.bar
+     * Note: Keys in the YAML must not contain dots.
+     * @param path path for the list.
+     * @return the list of sub YAMLs at the path or null if it could not be located.
+     */
+    @SuppressWarnings("unchecked")
+    public List<YAML> getYAMLList(String path) {
+        Object o = get(path);
+        if (o == null) {
+            return null;
+        }
+        if (!(o instanceof List)) {
+            log.trace("Expected a List for path '{}' but got {}", path, o.getClass().getName());
+            return null;
+        }
+        List<LinkedHashMap<String, Object>> hmList;
+        try {
+            hmList = (List<LinkedHashMap<String, Object>>)o;
+        } catch (Exception e) {
+            log.trace("Exception casting to List<LinkedHashMap<String, Object>>", e);
+            return null;
+        }
+        return hmList.stream().map(YAML::new).collect(Collectors.toList());
+    }
+
+    /**
      * Resolves the integer at the given path in the YAML. Supports {@code .} for path separation,
      * Sample path: foo.bar
      * Note: Keys in the YAML must not contain dots.
-     * @param path path for the string.
+     * @param path path for the integer.
      * @return the integer at the path or null if it could not be located.
      */
     public Integer getInteger(String path) {
@@ -112,7 +140,7 @@ public class YAML extends LinkedHashMap<String, Object> {
      * Resolves the Integer at the given path in the YAML. Supports {@code .} for path separation,
      * Sample path: foo.bar
      * Note: Keys in the YAML must not contain dots.
-     * @param path path for the Object.
+     * @param path path for the integer.
      * @param defaultValue if the path cannot be resolved, return this value.
      * @return the integer at the path or defaultValue if it could not be located.
      */
@@ -124,6 +152,30 @@ public class YAML extends LinkedHashMap<String, Object> {
             log.trace("Unable to parse '{}' to Integer", o);
             return null;
         }
+    }
+
+    /**
+     * Resolves the boolean at the given path in the YAML. Supports {@code .} for path separation,
+     * Sample path: foo.bar
+     * Note: Keys in the YAML must not contain dots.
+     * @param path path for the boolean.
+     * @return the boolean at the path or null if it could not be located.
+     */
+    public Boolean getBoolean(String path) {
+        return getBoolean(path, null);
+    }
+
+    /**
+     * Resolves the boolean at the given path in the YAML. Supports {@code .} for path separation,
+     * Sample path: foo.bar
+     * Note: Keys in the YAML must not contain dots.
+     * @param path path for the boolean.
+     * @param defaultValue if the path cannot be resolved, return this value.
+     * @return the boolean at the path or defaultValue if it could not be located.
+     */
+    public Boolean getBoolean(String path, Boolean defaultValue) {
+        Object o = get(path);
+        return o == null ? defaultValue : Boolean.valueOf(o.toString());
     }
 
     /**

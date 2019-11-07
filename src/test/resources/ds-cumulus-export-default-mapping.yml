@@ -1,0 +1,17 @@
+# Fill in the values for the keys and place the file as "ds-cumulus-export.yml"
+# on the classpath or in user.home.
+digisam:
+  maps:
+    default:
+      converters:
+        - source: "Titel"
+          dest: "title"
+          destType: "verbatim"
+        - source: "Item Creation Date"
+          dest: "created_date"
+          destType: "datetime"
+          destFallback: "created_date_verbatim"
+        - source: "År"
+          dest: "datetime"
+          destType: "datetimeRange"
+          destFallback: "datetime_verbatim"
