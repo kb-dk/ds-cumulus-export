@@ -70,7 +70,7 @@ public class CumulusExport {
                 String title = record.getFieldValueOrNull("Titel");
                 String creationDateFromCumulus = record.getFieldValueForNonStringField("Item Creation Date");
                 String created_date = CalendarUtils.getUTCTime(creationDateFromCumulus);
-                created_date_verbatim = getFallbackString(created_date_verbatim, creationDateFromCumulus, created_date);
+                created_date_verbatim = getFallbackString(creationDateFromCumulus, created_date);
                 String keyword = record.getFieldValueOrNull("Categories");
                 String subject = record.getFieldValueOrNull("Emneord");
                 String license = record.getFieldValueForNonStringField("Copyright");
@@ -79,8 +79,8 @@ public class CumulusExport {
                     image_url = ImageUrl.makeUrl(url);
                 }
                 String datetimeFromCumulus = record.getFieldValueOrNull("År");
-                String datetime = CalendarUtils.getUTCTime(datetimeFromCumulus, false);
-                datetime_verbatim = getFallbackString(datetime_verbatim, datetimeFromCumulus, datetime);
+                String datetime = CalendarUtils.getUTCTimeRange(datetimeFromCumulus);
+                datetime_verbatim = getFallbackString(datetimeFromCumulus, datetime);
                 String author = record.getFieldValueOrNull("Ophav");
 
                 final String[][] ATTRIBUTES = new String[][]{
@@ -124,11 +124,11 @@ public class CumulusExport {
         }
     }
 
-    private static String getFallbackString(String fallbackString, String str, String calcTime) {
+    private static String getFallbackString(String fallbackString, String calcTime) {
         if (calcTime == null) {
-            fallbackString = str;
+            return fallbackString;
         }
-        return fallbackString;
+        return null;
     }
 
 

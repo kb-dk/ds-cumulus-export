@@ -18,11 +18,15 @@ class CalendarUtilsTest {
     }
 
     @Test
-    void testGetUTCTimePadded() {
+    void testGetUTCTime() {
         final String[][] TESTS = new String[][] {
             {"2019", "2019-01-01T00:00:00Z"},
             {"2019-10", "2019-10-01T00:00:00Z"},
-            {"2019.10", "2019-10-01T00:00:00Z"}
+            {"2019.10", "2019-10-01T00:00:00Z"},
+            {"1897-1901", null},
+            {"2019-10-30", "2019-10-30T00:00:00Z"},
+            {"2019-20", null},
+            {"2019-13-30", null}
         };
 
         for (String[] test: TESTS) {
@@ -32,22 +36,27 @@ class CalendarUtilsTest {
     }
 
     @Test
-    void testGetUTCTimeNonPadded() {
+    void testGetUTCTimeRange() {
         final String[][] TESTS = new String[][]{
             {"2019", "2019"},
             {"2019-10", "2019-10"},
             {"2019.10", "2019-10"},
-            {"2019-20", "2019-20"},
+            {"2111-12", "2111-12"},
+            {"2111-13", "2111 TO 2113"},
+            {"2000-01", "2000-01"},
             {"2019-10-30", "2019-10-30"},
             {"2019.10.30", "2019-10-30"},
+            {"2019/10/30", "2019-10-30"},
+            {"2019-13-30", null},
             {"1969.05?", null},
             {"1838 eller 1898", null},
-            {"1897-1901", "1897 TO 1901"}
-
+            {"2019-10-32", null},
+            {"1897-1901", "1897 TO 1901"},
+            {"188-?", null}
         };
 
         for (String[] test : TESTS) {
-            assertEquals(test[1], CalendarUtils.getUTCTime(test[0], false),
+            assertEquals(test[1], CalendarUtils.getUTCTimeRange(test[0]),
                          "The input 'test[0]' should yield the expected datetime");
         }
     }
