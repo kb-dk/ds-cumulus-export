@@ -15,29 +15,33 @@
 package dk.kb.ds.cumulus.export.converters;
 
 import dk.kb.cumulus.CumulusRecord;
+import dk.kb.ds.cumulus.export.CalendarUtils;
 import dk.kb.ds.cumulus.export.FieldMapper;
 import dk.kb.ds.cumulus.export.YAML;
 
 import java.util.List;
 
 /**
- * Converts String content by either copying verbatim or splitting on newline.
- * Newline splitting is handled by {@link Converter}.
+ * Converts datetime into Solr DatePointField:
+ * {@code 2019-11-08T13:50:05Z}.
+ * @see <a href="https://lucene.apache.org/solr/8_3_0/solr-core/org/apache/solr/schema/DatePointField.html">DatePointField JavaDoc</a>
  */
-public class StringConverter extends Converter {
-
-    public static final String YAML_PATTERN = "pattern";
+public class DatetimeConverter extends Converter {
 
     public static void register() {
-        ConverterFactory.registerCreator("string", StringConverter::new);
+        ConverterFactory.registerCreator("datetime", DatetimeConverter::new);
     }
 
-    public StringConverter(YAML config) {
+    public DatetimeConverter(YAML config) {
         super(config);
     }
 
     @Override
-    public void convertImpl(CumulusRecord record, List<FieldMapper.FieldValue> resultList) {
-        addValue(getAsString(record), resultList);
+    public void convertImpl(CumulusRecord record, List<FieldMapper.FieldValue> resultList) throws IllegalStateException {
+        String datetimeStr = getAsString(record);
+        if (datetimeStr == null) {
+            return;
+        }
+        addValue(CalendarUtils.getUTCTime(datetimeStr), resultList);
     }
 }

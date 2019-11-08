@@ -5,13 +5,13 @@ digisam:
     default:
       converters:
         - source: "Titel"
+          destType: "string"
           dest: "title"
-          destType: "verbatim"
         - source: "Item Creation Date"
-          dest: "created_date"
           destType: "datetime"
+          dest: "created_date"
           destFallback: "created_date_verbatim"
         - source: "År"
-          dest: "datetime"
           destType: "datetimeRange"
+          dest: "datetime"
           destFallback: "datetime_verbatim"

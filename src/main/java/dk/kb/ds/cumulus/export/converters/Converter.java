@@ -18,6 +18,8 @@ import com.canto.cumulus.fieldvalue.AssetReference;
 import dk.kb.cumulus.CumulusRecord;
 import dk.kb.ds.cumulus.export.FieldMapper;
 import dk.kb.ds.cumulus.export.YAML;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Objects;
@@ -26,15 +28,31 @@ import java.util.Objects;
  * Abstract field → field converter with helper methods. Implementations handle the actual conversion.
  */
 public abstract class Converter {
+    private static final Logger log = LoggerFactory.getLogger(Converter.class);
+
     public enum SOURCE_TYPE {string, assetReference}
-    public enum DEST_TYPE {verbatim, int32, int64, bool, float32, float64, datetime, datetimeRange, pattern}
 
     public final String source;
     public final SOURCE_TYPE sourceType; // Default is string
     public final String destination;
     public final String fallbackDestination;
-    public final DEST_TYPE destinationType;
+    public final String destinationType;
     public final boolean required;
+    public final boolean linebreakIsMulti;
+
+    /**
+     * Fills in basic attributed as specified in the config.
+     * @param config configuration for a Converter implementation.
+     */
+    public Converter(YAML config) {
+        this(config.getString("source"),
+             config.containsKey("sourceType") ? SOURCE_TYPE.valueOf(config.getString("sourceType")) : null,
+             config.getString("dest"), config.getString("fallbackDest"),
+             config.getString("destType"),
+             config.getBoolean("required", false),
+             config.getBoolean("lineBreakIsMulti", false)
+             );
+    }
 
     /**
      * @param source              the source field name.
@@ -44,17 +62,31 @@ public abstract class Converter {
      *                            this will always be the verbatim source value. fallbackDestination can be null.
      * @param destinationType     the destination data type.
      * @param required            if true, an exception will be thrown if the source field is not present.
+     * @param lineBreakIsMulti    if true, calls to {@link #addValue} with values containing linebreaks will result in
+     *                            multiple additions to the output, one per line.
      */
     public Converter(String source, SOURCE_TYPE sourceType,
-                     String destination, String fallbackDestination, DEST_TYPE destinationType,
-                     boolean required) {
+                     String destination, String fallbackDestination, String destinationType,
+                     boolean required, boolean lineBreakIsMulti) {
         this.source = source;
         this.sourceType = sourceType == null ? SOURCE_TYPE.string : sourceType;
         this.destination = destination;
         this.fallbackDestination = fallbackDestination;
         this.destinationType = destinationType;
         this.required = required;
+        this.linebreakIsMulti = lineBreakIsMulti;
     }
+
+    /**
+     * Extract the content of the {@link #source} field from the record, process it and add the result(s) to
+     * fieldValues. The use of {@link #fallbackDestination} is handled by the abstract {@Converter}: Implementations
+     * should simply do nothing if the value could not be added.
+     * @param record     a Cumulus record.
+     * @param resultList the destination for the processed values.
+     * @throws IllegalArgumentException if the combination of input and processing was not valid.
+     */
+    abstract void convertImpl(CumulusRecord record, List<FieldMapper.FieldValue> resultList)
+        throws IllegalArgumentException;
 
     /**
      * Extract the content of the {@link #source} field from the record, process it and
@@ -64,8 +96,26 @@ public abstract class Converter {
      * @throws IllegalArgumentException if the combination of input and processing was not valid.
      * @throws IllegalStateException if the {@link #source} was required but not present in the record.
      */
-    public abstract void convert(CumulusRecord record, List<FieldMapper.FieldValue> resultList)
-        throws IllegalArgumentException, IllegalStateException;
+    public void convert(CumulusRecord record, List<FieldMapper.FieldValue> resultList)
+        throws IllegalArgumentException, IllegalStateException {
+        final int beforeSize = resultList.size();
+        convertImpl(record, resultList);
+        if (beforeSize != resultList.size()) {
+            return;
+        }
+        if (required) {
+            throw new IllegalStateException(
+                "The required field '" + source + "' should result in at least 1 output field, but did not");
+        }
+        String sourceValue = getAsString(record);
+        if (fallbackDestination != null && !fallbackDestination.isEmpty() &&
+            sourceValue != null && !sourceValue.isEmpty()) {
+            log.debug("Could not derive a value for primary destination field '{}' for value '{}' " +
+                      "with destination type '{}', copying verbatim to fallback field '{}'",
+                      destination, sourceValue, destinationType, fallbackDestination);
+            resultList.add(new FieldMapper.FieldValue(fallbackDestination, sourceValue));
+        }
+    }
 
     /**
      * Helper method for implementing classes.
@@ -104,7 +154,7 @@ public abstract class Converter {
      * @param values to add to the resultList.
      * @param resultList the values will be added as {@link #destination}-value pairs to this list.
      */
-    protected void addValues(List<String> values, List<FieldMapper.FieldValue> resultList) {
+    void addValues(List<String> values, List<FieldMapper.FieldValue> resultList) {
         if (values == null) {
             return;
         }
@@ -112,29 +162,30 @@ public abstract class Converter {
     }
     /**
      * Add the given value to the resultList if the value is not null.
-     * @param resultList the value will be added as a {@link #destination}-value pair to this list.
-     * @param value a value to add to the resultList.
-     */
-    protected void addValue(String value, List<FieldMapper.FieldValue> resultList) {
-        addValue(value, false, resultList);
-    }
-    /**
-     * Add the given value to the resultList if the value is not null.
+     * Note: If {@link #linebreakIsMulti} is trie, values with multiple lines will be split into lines and each line
+     * will be added separately.
      * @param value a value to add to the resultList.
      * @param resultList the value will be added as a {@link #destination}-value pair to this list.
-     * @param linebreakIsMulti if true, the value will be split on linebreaks and each line added as a separate
-     *                         pair to resultList.
      */
-    protected void addValue(String value, boolean linebreakIsMulti, List<FieldMapper.FieldValue> resultList) {
-        if (value != null) {
-            if (linebreakIsMulti) {
-                for (String line : value.split("\\r?\\n")) {
-                    resultList.add(new FieldMapper.FieldValue(destination, line));
-                }
-            } else {
-                resultList.add(new FieldMapper.FieldValue(destination, value));
-            }
-
+    void addValue(String value, List<FieldMapper.FieldValue> resultList) {
+        if (value == null) {
+            return;
         }
+        if (linebreakIsMulti) {
+            for (String line : value.split("\\r?\\n")) {
+                resultList.add(new FieldMapper.FieldValue(destination, line));
+            }
+        } else {
+            resultList.add(new FieldMapper.FieldValue(destination, value));
+        }
+    }
+
+    /**
+     * "Override" this in implementing classes and call something like
+     * {@code ConverterFactory.registerCreator("string", StringConverter::new);}
+     */
+    public static void register() {
+        throw new UnsupportedOperationException(
+            "The static method 'register' must be defined in all implementations of Converter");
     }
 }

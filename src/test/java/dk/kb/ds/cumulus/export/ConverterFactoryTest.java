@@ -1,6 +1,7 @@
 package dk.kb.ds.cumulus.export;
 
 import dk.kb.ds.cumulus.export.converters.Converter;
+import dk.kb.ds.cumulus.export.converters.ConverterFactory;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;

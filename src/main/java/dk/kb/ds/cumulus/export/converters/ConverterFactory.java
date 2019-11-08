@@ -12,20 +12,25 @@
  *  limitations under the License.
  *
  */
-package dk.kb.ds.cumulus.export;
+package dk.kb.ds.cumulus.export.converters;
 
-import dk.kb.ds.cumulus.export.converters.Converter;
-import dk.kb.ds.cumulus.export.converters.StringConverter;
+import dk.kb.ds.cumulus.export.Configuration;
+import dk.kb.ds.cumulus.export.FieldMapper;
+import dk.kb.ds.cumulus.export.YAML;
+import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.function.Function;
 
 /**
+ * Produces a Map of {@link Converter}s based on a YAML configuration.
  *
+ * Note: Implementations of {@link Converter} should self-register by calling
+ *       {@link ConverterFactory#registerCreator(String, Function)}.
+ *       See {@link StringConverter} for an example.
  */
 public class ConverterFactory {
     private static final Logger log = LoggerFactory.getLogger(FieldMapper.class);
@@ -33,12 +38,33 @@ public class ConverterFactory {
     /**
      * If mapName is not specified in {@link #build(String, String)} this name will be used.
      */
-    public static final String DEFAULT_MAP = "default";
+    public static final String YAML_DEFAULT_MAP = "default";
 
-    // YAML keys below
-    public static final String CONVERTERS = "converters";
-    public static final String CUMULUS = "cumulus";
-    public static final String SOLR = "solr";
+    // YAML keys
+    public static final String YAML_CONVERTERS = "converters";
+    public static final String YAML_CUMULUS = "cumulus";
+    public static final String YAML_SOLR = "solr";
+
+    /**
+     * The supported converters, represented by their creators.
+     * Implementations of {@link Converter} should call {@link #registerCreator} to register.
+     */
+    private static final Map<String, Function<YAML, Converter>> creators = new HashMap<>();
+    /**
+     * Find all classes implementing {@link Converter} and makes them register in this factory.
+     */
+    static {
+        Reflections reflections = new Reflections("");
+        Set<Class<? extends Converter>> classes = reflections.getSubTypesOf(Converter.class);
+        for (Class<? extends Converter> c: classes) {
+            try {
+                c.getMethod("register").invoke(null);
+            } catch (Exception e) {
+                throw new Error(
+                    "Cannot invoke 'register' method on Converter-implementing class '" + c.getName() + "'");
+            }
+        }
+    }
 
     /**
      * Creates a Map of {@link Converter}s from the given configuration.
@@ -50,7 +76,7 @@ public class ConverterFactory {
      */
     public static Map<String, Converter> build(String converterConfig, String mapName) throws IOException {
         if (mapName == null) {
-            mapName = DEFAULT_MAP;
+            mapName = YAML_DEFAULT_MAP;
         }
         YAML baseYAML = YAML.resolveConfig(converterConfig, Configuration.CONF_ROOT);
         YAML mapYAML = baseYAML.getSubMap("maps." + mapName);
@@ -66,7 +92,7 @@ public class ConverterFactory {
      * @return a map with Converters as specified in mapConfig.
      */
     public static Map<String, Converter> build(YAML mapConfig) {
-        List<YAML> converterConfigs = mapConfig.getYAMLList(CONVERTERS);
+        List<YAML> converterConfigs = mapConfig.getYAMLList(YAML_CONVERTERS);
         log.debug("Got {} converter configurations", converterConfigs.size());
 
         Map<String, Converter> converters = new HashMap<>(converterConfigs.size());
@@ -78,9 +104,22 @@ public class ConverterFactory {
 
     private static Converter buildConverter(YAML converterConfig) {
         final String destType = converterConfig.getString("destType");
-        switch (destType) {
-            case "verbatim" : return new StringConverter(converterConfig);
-            default: throw new IllegalArgumentException("No converter for destType '" + destType + "'");
+        Function<YAML, Converter> creator = creators.get(destType);
+        if (creator == null) {
+            throw new IllegalArgumentException("Unsupported destination type '" + destType + "'");
         }
+        return creator.apply(converterConfig);
     }
+
+    public static void registerCreator(String destType, Function<YAML, Converter> cc) {
+        if (creators.containsKey(destType)) {
+            throw new IllegalArgumentException(
+                "Received a ConverterCreator with destination type '" + destType + "', but a ConverterCreator" +
+                " for that type is already registered. Existing creator: " + creators.get(destType) +
+                ", new creator: " + cc);
+        }
+        log.info("Registering ConverterCreator for destination type " + destType);
+        creators.put(destType, cc);
+    }
+
 }

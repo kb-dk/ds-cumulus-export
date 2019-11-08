@@ -15,29 +15,33 @@
 package dk.kb.ds.cumulus.export.converters;
 
 import dk.kb.cumulus.CumulusRecord;
+import dk.kb.ds.cumulus.export.CalendarUtils;
 import dk.kb.ds.cumulus.export.FieldMapper;
 import dk.kb.ds.cumulus.export.YAML;
 
 import java.util.List;
 
 /**
- * Converts String content by either copying verbatim or splitting on newline.
- * Newline splitting is handled by {@link Converter}.
+ * Converts datetime into Solr DateRangeField, which supports arbitrary precision and ranges:
+ * {@code 2019-11-08}, {@code 2019-11-08T13:50:05Z}, {@code 2019-11 TO 2019-12-05}.
+ * @see <a href="https://lucene.apache.org/solr/8_3_0/solr-core/org/apache/solr/schema/DateRangeField.html">DateRangeField JavaDoc</a>
  */
-public class StringConverter extends Converter {
-
-    public static final String YAML_PATTERN = "pattern";
+public class DatetimeRangeConverter extends Converter {
 
     public static void register() {
-        ConverterFactory.registerCreator("string", StringConverter::new);
+        ConverterFactory.registerCreator("datetimeRange", DatetimeRangeConverter::new);
     }
 
-    public StringConverter(YAML config) {
+    public DatetimeRangeConverter(YAML config) {
         super(config);
     }
 
     @Override
-    public void convertImpl(CumulusRecord record, List<FieldMapper.FieldValue> resultList) {
-        addValue(getAsString(record), resultList);
+    public void convertImpl(CumulusRecord record, List<FieldMapper.FieldValue> resultList) throws IllegalStateException {
+        String datetimeStr = getAsString(record);
+        if (datetimeStr == null) {
+            return;
+        }
+        addValue(CalendarUtils.getUTCTimeRange(datetimeStr), resultList);
     }
 }
