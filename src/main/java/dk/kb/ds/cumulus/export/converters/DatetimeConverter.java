@@ -38,7 +38,10 @@ public class DatetimeConverter extends Converter {
 
     @Override
     public void convertImpl(CumulusRecord record, List<FieldMapper.FieldValue> resultList) throws IllegalStateException {
-        String datetimeStr = getAsString(record);
+        convertImpl(getAsString(record), resultList);
+    }
+
+    private void convertImpl(String datetimeStr, List<FieldMapper.FieldValue> resultList) {
         if (datetimeStr == null) {
             return;
         }
