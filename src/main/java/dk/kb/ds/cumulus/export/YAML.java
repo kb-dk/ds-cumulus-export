@@ -27,6 +27,7 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -44,7 +45,7 @@ public class YAML extends LinkedHashMap<String, Object> {
      * Changes to the map will be reflected in the YAML instance and vice versa.
      * @param map a map presumable delivered by SnakeYAML.
      */
-    public YAML(LinkedHashMap<String, Object> map) {
+    public YAML(Map<String, Object> map) {
         this.putAll(map);
     }
 
@@ -61,14 +62,14 @@ public class YAML extends LinkedHashMap<String, Object> {
         if (o == null) {
             return null;
         }
-        if (!(o instanceof LinkedHashMap)) {
-            log.trace("Expected a LinkedHashMap for path '{}' but got {}", path, o);
+        if (!(o instanceof Map)) {
+            log.trace("Expected a Map for path '{}' but got {}", path, o);
             return null;
         }
         try {
-            return new YAML((LinkedHashMap<String, Object>) o);
+            return new YAML((Map<String, Object>) o);
         } catch (Exception e) {
-            log.trace("Expected a LinkedHashMap for path '{}' but got {}", path, o.getClass().getName());
+            log.trace("Expected a Map for path '{}' but got {}", path, o.getClass().getName());
             return null;
         }
     }
@@ -115,11 +116,11 @@ public class YAML extends LinkedHashMap<String, Object> {
             log.trace("Expected a List for path '{}' but got {}", path, o.getClass().getName());
             return null;
         }
-        List<LinkedHashMap<String, Object>> hmList;
+        List<Map<String, Object>> hmList;
         try {
-            hmList = (List<LinkedHashMap<String, Object>>)o;
+            hmList = (List<Map<String, Object>>)o;
         } catch (Exception e) {
-            log.trace("Exception casting to List<LinkedHashMap<String, Object>>", e);
+            log.trace("Exception casting to List<Map<String, Object>>", e);
             return null;
         }
         return hmList.stream().map(YAML::new).collect(Collectors.toList());
@@ -251,14 +252,14 @@ public class YAML extends LinkedHashMap<String, Object> {
             if (i == elements.length-1) {
                 return sub;
             }
-            if (!(sub instanceof LinkedHashMap)) {
-                log.trace("The sub element '{}' in path '{}' was not a LinkedHashMap", elements[i], path);
+            if (!(sub instanceof Map)) {
+                log.trace("The sub element '{}' in path '{}' was not a Map", elements[i], path);
                 return null;
             }
             try {
-                current = new YAML((LinkedHashMap<String, Object>) sub);
+                current = new YAML((Map<String, Object>) sub);
             } catch (Exception e) {
-                log.trace("Expected a LinkedHashMap<String, Object> for path '{}' but got casting failed", path);
+                log.trace("Expected a Map<String, Object> for path '{}' but got casting failed", path);
                 return null;
             }
         }
@@ -270,7 +271,7 @@ public class YAML extends LinkedHashMap<String, Object> {
     /**
      * Resolve the given YAML configuration.
      * @param configName the name of the configuration file.
-     * @return the configuration parsed up as a tree represented as LinkedHashMap and wrapped as YAML.
+     * @return the configuration parsed up as a tree represented as Map and wrapped as YAML.
      * @throws IOException if the configuration could not be fetched.
      */
     public static YAML resolveConfig(String configName) throws IOException {
@@ -281,7 +282,7 @@ public class YAML extends LinkedHashMap<String, Object> {
      * Resolve the given YAML configuration.
      * @param configName the name of the configuration file.
      * @param confRoot the root element in the configuration or null if the full configuration is to be returned.
-     * @return the configuration parsed up as a tree represented as LinkedHashMap and wrapped as YAML.
+     * @return the configuration parsed up as a tree represented as Map and wrapped as YAML.
      * @throws IOException if the configuration could not be fetched.
      */
     public static YAML resolveConfig(String configName, String confRoot) throws IOException {
@@ -290,7 +291,7 @@ public class YAML extends LinkedHashMap<String, Object> {
         Object raw;
         try (InputStream configStream = configURL.openStream()) {
             raw = new Yaml().load(configStream);
-            if(!(raw instanceof LinkedHashMap)) {
+            if(!(raw instanceof Map)) {
                 throw new IllegalArgumentException("The config resource '" + configURL
                         + "' does not contain a valid DS Cumulus Export configuration.");
             }
@@ -299,7 +300,7 @@ public class YAML extends LinkedHashMap<String, Object> {
                 "Exception trying to load the DS Cumulus Export configuration from '" + configURL + "'");
         }
 
-        YAML rootMap = new YAML((LinkedHashMap<String, Object>) raw);
+        YAML rootMap = new YAML((Map<String, Object>) raw);
 
         if (confRoot == null) {
             return rootMap;
