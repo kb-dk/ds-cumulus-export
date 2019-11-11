@@ -31,8 +31,8 @@ import java.util.regex.Pattern;
 public class StringConverter extends Converter {
     private static final Logger log = LoggerFactory.getLogger(StringConverter.class);
 
-    public static final String YAML_PATTERN = "pattern";
-    public static final String YAML_REPLACEMENT = "replacement";
+    public static final String CONF_PATTERN = "pattern";
+    public static final String CONF_REPLACEMENT = "replacement";
 
     private Pattern pattern;
     private String replacement;
@@ -43,8 +43,8 @@ public class StringConverter extends Converter {
 
     public StringConverter(YAML config) {
         super(config);
-        pattern = config.containsKey(YAML_PATTERN) ? Pattern.compile(config.getString(YAML_PATTERN)) : null;
-        replacement = config.getString(YAML_PATTERN, null);
+        pattern = config.containsKey(CONF_PATTERN) ? Pattern.compile(config.getString(CONF_PATTERN)) : null;
+        replacement = config.getString(CONF_REPLACEMENT, null);
         if (pattern != null) {
             log.debug("");
             if (replacement == null) {
@@ -56,14 +56,23 @@ public class StringConverter extends Converter {
 
     @Override
     public void convertImpl(CumulusRecord record, List<FieldMapper.FieldValue> resultList) {
-        final String input = getAsString(record);
+        convertImpl(getAsString(record), resultList);
+    }
+
+    void convertImpl(String input, List<FieldMapper.FieldValue> resultList) {
         if (input == null) {
             return;
         }
-        if (pattern == null) {
+        if (pattern == null) { // Plain string copying
             addValue(input, resultList);
             return;
         }
-        throw new UnsupportedOperationException("Not implemented yet");
+
+        // Pattern matching & replacement
+        Matcher matcher = pattern.matcher(input);
+        if (!matcher.matches()) {
+            return;
+        }
+        addValue(matcher.replaceAll(replacement), resultList);
     }
 }
