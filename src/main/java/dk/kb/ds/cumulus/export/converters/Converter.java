@@ -30,6 +30,19 @@ import java.util.Objects;
 public abstract class Converter {
     private static final Logger log = LoggerFactory.getLogger(Converter.class);
 
+    // YAML keys
+    public static final String CONF_SOURCE =                 "source";
+    public static final String CONF_SOURCE_TYPE =            "sourceType";
+    public static final String DEFAULT_SOURCE_TYPE =         "string";
+    public static final String CONF_DEST =                   "dest";
+    public static final String CONF_FALLBACK_DEST =          "fallbackDest";
+    public static final String CONF_DEST_TYPE =              "destType";
+    public static final String CONF_REQUIRED =               "required";
+    public static final boolean DEFAULT_REQUIRED =            false;
+    public static final String CONF_LINE_BREAK_IS_MULTI =    "lineBreakIsMulti";
+    public static final boolean DEFAULT_LINE_BREAK_IS_MULTI = false;
+
+
     public enum SOURCE_TYPE {string, assetReference}
 
     public final String source;
@@ -45,12 +58,12 @@ public abstract class Converter {
      * @param config configuration for a Converter implementation.
      */
     public Converter(YAML config) {
-        this(config.getString("source"),
-             config.containsKey("sourceType") ? SOURCE_TYPE.valueOf(config.getString("sourceType")) : null,
-             config.getString("dest"), config.getString("fallbackDest"),
-             config.getString("destType"),
-             config.getBoolean("required", false),
-             config.getBoolean("lineBreakIsMulti", false)
+        this(config.getString(CONF_SOURCE, DEFAULT_SOURCE_TYPE),
+             config.containsKey(CONF_SOURCE_TYPE) ? SOURCE_TYPE.valueOf(config.getString(CONF_SOURCE_TYPE)) : null,
+             config.getString(CONF_DEST), config.getString(CONF_FALLBACK_DEST),
+             config.getString(CONF_DEST_TYPE),
+             config.getBoolean(CONF_REQUIRED, DEFAULT_REQUIRED),
+             config.getBoolean(CONF_LINE_BREAK_IS_MULTI, DEFAULT_LINE_BREAK_IS_MULTI)
              );
     }
 
@@ -92,15 +105,15 @@ public abstract class Converter {
      * Extract the content of the {@link #source} field from the record, process it and
      * add the result(s) to fieldValues.
      * @param record     a Cumulus record.
-     * @param resultList the destination for the processed values.
+     * @param fieldValues the destination for the processed values.
      * @throws IllegalArgumentException if the combination of input and processing was not valid.
      * @throws IllegalStateException if the {@link #source} was required but not present in the record.
      */
-    public void convert(CumulusRecord record, List<FieldMapper.FieldValue> resultList)
+    public void convert(CumulusRecord record, FieldMapper.FieldValues fieldValues)
         throws IllegalArgumentException, IllegalStateException {
-        final int beforeSize = resultList.size();
-        convertImpl(record, resultList);
-        if (beforeSize != resultList.size()) {
+        final int beforeSize = fieldValues.size();
+        convertImpl(record, fieldValues);
+        if (beforeSize != fieldValues.size()) {
             return;
         }
         if (required) {
@@ -113,7 +126,7 @@ public abstract class Converter {
             log.debug("Could not derive a value for primary destination field '{}' for value '{}' " +
                       "with destination type '{}', copying verbatim to fallback field '{}'",
                       destination, sourceValue, destinationType, fallbackDestination);
-            resultList.add(new FieldMapper.FieldValue(fallbackDestination, sourceValue));
+            fieldValues.add(new FieldMapper.FieldValue(fallbackDestination, sourceValue));
         }
     }
 
