@@ -16,43 +16,78 @@ package dk.kb.ds.cumulus.export;
 
 import dk.kb.cumulus.CumulusRecord;
 import dk.kb.ds.cumulus.export.converters.Converter;
+import dk.kb.ds.cumulus.export.converters.ConverterFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.io.IOException;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collector;
+import java.util.stream.Stream;
 
 /**
- *
+ * Extracts selected fields from {@link CumulusRecord}s and provides a list of {@link FieldValue}s with the
+ * content of these fields. Depending on setup, the content will be modified during this process.
  */
-public class FieldMapper {
+public class FieldMapper implements Function<CumulusRecord, FieldMapper.FieldValues> {
     private static final Logger log = LoggerFactory.getLogger(FieldMapper.class);
 
     private final Map<String, Converter> converters;
 
-    public FieldMapper() {
-        throw new UnsupportedOperationException("Not implemented yet");
+    /**
+     * Loads a {@link ConverterFactory} setup, as specified in the base configuration, and constructs a field mapper.
+     * @throws IOException if the f
+     */
+    public FieldMapper() throws IOException {
+        final String convResource = Configuration.getYAML().getString(
+            Configuration.CONF_CONVERSION_SETUP, Configuration.DEFAULT_CONVERSION_SETUP);
+        final String convMap = Configuration.getYAML().getString(
+            Configuration.CONF_CONVERSION_MAP, Configuration.DEFAULT_CONVERSION_MAP);
+        log.info("Loading conversion setup from resource " + convResource + " with map " + convMap);
+        converters = ConverterFactory.build(convResource, convMap);
+        log.debug("Loading successful for conversion setup from resource " + convResource + " with map " + convMap);
     }
 
     /**
-     * Convert the given record according to the setup.
+     * Applies the configured {@link Converter}s to the given record.
      * @param record a Cumulus record.
-     * @return a list for field-value pairs.
+     * @return a list of field-value pairs.
      * @throws IllegalArgumentException if a combination of input and processing was not valid.
      * @throws IllegalStateException if a required field was not present in the record.
      */
-    public List<FieldValue> convert(CumulusRecord record) {
-        List<FieldValue> resultList = new ArrayList<>();
-        for (Converter converter: converters.values()) {
-            converter.convert(record, resultList);
-        }
-        log.trace("Produced {} fieldValues for the given record", resultList.size());
-        return resultList;
+    @Override
+    public FieldValues apply(CumulusRecord record) {
+        FieldValues fieldValues = new FieldValues();
+        converters.forEach((n, c) -> c.convert(record, fieldValues));
+        log.trace("Produced {} fieldValues for the given record", fieldValues.size());
+
+        return fieldValues;
     }
 
     /**
-     * Simple pair of field name and value.
+     * Representation of all field value pairs for a document.
+     */
+    public static class FieldValues extends ArrayList<FieldValue> {
+        /**
+         * Created a {@code <doc>} under the given rootElement and fills it with the {@link FieldValue}s
+         * {@code <field name="field">value</field>}.
+         * @param rootElement the generated doc-element will be added here.
+         */
+        public void toDoc(Element rootElement) {
+            final Document base = rootElement.getOwnerDocument();
+
+            Element docElement = base.createElement("doc");
+            rootElement.appendChild(docElement);
+
+            forEach(fv -> fv.toDoc(docElement));
+        }
+    }
+
+    /**
+     * Single field value pair.
      */
     public static class FieldValue {
         public final String field;
@@ -61,6 +96,24 @@ public class FieldMapper {
         public FieldValue(String field, String value) {
             this.field = field;
             this.value = value;
+        }
+
+        /**
+         * Adds the contained field and value to the given solrDoc as {@code <field name="field">value</field>}.
+         * @param solrDoc where to add the field and value.
+         */
+        public void toDoc(Element solrDoc) {
+            final Document base = solrDoc.getOwnerDocument();
+
+            Element fieldElement = base.createElement("field");
+            solrDoc.appendChild(fieldElement);
+            fieldElement.setAttribute("name", field);
+            fieldElement.appendChild(base.createTextNode(value));
+        }
+
+        @Override
+        public String toString() {
+            return "FieldValue(" + "field='" + field + "', value='" + value + "')";
         }
     }
 

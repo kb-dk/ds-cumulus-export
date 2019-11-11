@@ -16,13 +16,11 @@ package dk.kb.ds.cumulus.export;
 
 import dk.kb.cumulus.config.CumulusConfiguration;
 import dk.kb.cumulus.utils.ArgumentCheck;
+import dk.kb.ds.cumulus.export.converters.ConverterFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Central configuration for the DS Cumulus Exporter.
@@ -63,6 +61,19 @@ public class Configuration {
     public static final String CONF_OUTPUT_FILE = "outputfile";
     /** The type of object to get info from */
     public static final String CONF_TYPE = "type";
+
+    /**
+     * The name of the conversion setup used by {@link dk.kb.ds.cumulus.export.converters.ConverterFactory}.
+     * If this is not defined, the fallback is {@code ds-cumulus-export-default-mapping.yml}.
+     */
+    public static final String CONF_CONVERSION_SETUP = "conversionSetup";
+    public static final String DEFAULT_CONVERSION_SETUP = "ds-cumulus-export-default-mapping.yml";
+    /**
+     * The name of the conversion map to use.
+     * If this is not defined, the fallback is {@code default}.
+     */
+    public static final String CONF_CONVERSION_MAP = "conversionMap";
+    public static final String DEFAULT_CONVERSION_MAP = ConverterFactory.DEFAULT_MAP;
 
     /** Whether Cumulus should have write access. */
     protected static final boolean CUMULUS_WRITE_ACCESS = false;

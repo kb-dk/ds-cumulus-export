@@ -36,14 +36,19 @@ public class ConverterFactory {
     private static final Logger log = LoggerFactory.getLogger(FieldMapper.class);
 
     /**
+     * The sub-YAML containing all the conversion maps.
+     */
+    public static final String CONF_MAPS = "maps";
+
+    /**
      * If mapName is not specified in {@link #build(String, String)} this name will be used.
      */
-    public static final String YAML_DEFAULT_MAP = "default";
+    public static final String DEFAULT_MAP = "default";
 
     // YAML keys
-    public static final String YAML_CONVERTERS = "converters";
-    public static final String YAML_CUMULUS = "cumulus";
-    public static final String YAML_SOLR = "solr";
+    public static final String CONF_CONVERTERS = "converters";
+    public static final String CONF_CUMULUS = "cumulus";
+    public static final String CONF_SOLR = "solr";
 
     /**
      * The supported converters, represented by their creators.
@@ -70,16 +75,16 @@ public class ConverterFactory {
      * Creates a Map of {@link Converter}s from the given configuration.
      * @param converterConfig a YAML file specifying conversions.
      *                        See ds-cumulus-export-default-mapping.yml in the test folder for a sample setup.
-     * @param mapName the name of the map in the given converterConfig to use.
+     * @param mapName the name of the map in the given converterConfig to use. Default is "default".
      * @return a map with Converters as specified in converterConfig.
      * @throws IOException if the configuration could not be resolved/fetched.
      */
     public static Map<String, Converter> build(String converterConfig, String mapName) throws IOException {
         if (mapName == null) {
-            mapName = YAML_DEFAULT_MAP;
+            mapName = DEFAULT_MAP;
         }
         YAML baseYAML = YAML.resolveConfig(converterConfig, Configuration.CONF_ROOT);
-        YAML mapYAML = baseYAML.getSubMap("maps." + mapName);
+        YAML mapYAML = baseYAML.getSubMap(CONF_MAPS + "." + mapName);
         if (mapYAML == null) {
             throw new IOException("Unable to locate map '" + mapName + "'");
         }
@@ -92,7 +97,7 @@ public class ConverterFactory {
      * @return a map with Converters as specified in mapConfig.
      */
     public static Map<String, Converter> build(YAML mapConfig) {
-        List<YAML> converterConfigs = mapConfig.getYAMLList(YAML_CONVERTERS);
+        List<YAML> converterConfigs = mapConfig.getYAMLList(CONF_CONVERTERS);
         log.debug("Got {} converter configurations", converterConfigs.size());
 
         Map<String, Converter> converters = new HashMap<>(converterConfigs.size());
