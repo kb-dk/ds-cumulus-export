@@ -18,8 +18,6 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 class FieldMapperTest {
 
     @Test
@@ -30,30 +28,10 @@ class FieldMapperTest {
         );
         FieldMapper mapper = new FieldMapper();
         FieldMapper.FieldValues fieldValues = mapper.apply(record);
-        assertContent(fieldValues,
-                      "title", "myTitle",
-                      "datetime", "2019-11-11");
+        DSAsserts.assertFieldValues(
+            fieldValues,
+            "title", "myTitle",
+            "datetime", "2019-11-11");
     }
 
-    /**
-     * Helper for checking that conversion yielded the expected result-
-     * @param fieldValues the converted key-values.
-     * @param expectedValues the expected key-values.
-     */
-    private void assertContent(FieldMapper.FieldValues fieldValues, String... expectedValues) {
-        if (expectedValues.length % 2 == 1) {
-            throw new IllegalArgumentException("The number of keyValues should be even but was " + expectedValues.length);
-        }
-        out:
-        for (int i = 0 ; i < expectedValues.length ; i+=2) {
-            for (FieldMapper.FieldValue fv: fieldValues) {
-                if (fv.field.equals(expectedValues[i])) {
-                    assertEquals(expectedValues[i+1], fv.value,
-                                 "The field " + expectedValues[i] + " should contain the right value");
-                    continue out;
-                }
-            }
-            fail("There should be a fieldValue with key '" + expectedValues[i] + "'");
-        }
-    }
 }
