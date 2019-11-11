@@ -26,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class DSAsserts {
 
     /**
-     * Helper for checking that conversion yielded the expected result-
+     * Helper for checking that conversion yielded the expected result.
      * @param fieldValues the converted key-values.
      * @param expectedFieldValues the expected key-values.
      */
@@ -48,6 +48,12 @@ public class DSAsserts {
         }
     }
 
+    /**
+     * Helper for checking that conversion yielded the expected multi-valued result.
+     * @param fieldValues the converted key-values.
+     * @param expectedKey the key for the field to test.
+     * @param expectedValues the values that should be in the field.
+     */
     public static void assertMultiFieldValues(
         FieldMapper.FieldValues fieldValues, String expectedKey, String... expectedValues) {
         List<String> pool = new ArrayList<>(Arrays.asList(expectedValues));
