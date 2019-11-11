@@ -23,15 +23,42 @@ class FieldMapperTest {
     @Test
     public void testBasicMapping() throws IOException {
         CumulusRecordMock record = new CumulusRecordMock(
+            "guid", "myID",
             "Titel", "myTitle",
-            "År", "2019-11-11"
+            "År", "2019-11-11",
+            "Item Creation Date", "Fri Oct 04 10:05:10 CET 2019",
+            "Categories", "toys\nanimals",
+            "Emneord", "Old wars\nNew orders",
+            "Ophav", "H.C. Andersen\nGrimm E. Ulv",
+            "Copyright", "Custom License"
         );
         FieldMapper mapper = new FieldMapper();
         FieldMapper.FieldValues fieldValues = mapper.apply(record);
+
         DSAsserts.assertFieldValues(
             fieldValues,
+            "id", "ds_billedsamling_myID",
             "title", "myTitle",
-            "datetime", "2019-11-11");
+            "datetime", "2019-11-11",
+            "created_date", "2019-10-04T08:05:10Z",
+            "license", "Custom License"
+        );
+
+        DSAsserts.assertMultiFieldValues(
+            fieldValues,
+            "keyword",
+            "toys", "animals"
+        );
+        DSAsserts.assertMultiFieldValues(
+            fieldValues,
+            "subject",
+            "Old wars", "New orders"
+        );
+        DSAsserts.assertMultiFieldValues(
+            fieldValues,
+            "author",
+            "H.C. Andersen", "Grimm E. Ulv"
+        );
     }
 
 }

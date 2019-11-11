@@ -1,17 +1,45 @@
-# Fill in the values for the keys and place the file as "ds-cumulus-export.yml"
+# Field mapping and conversion configuration. Place the file as "ds-cumulus-export-default-mapping.yml"
 # on the classpath or in user.home.
 digisam:
   maps:
     default:
       converters:
-        - source: "Titel"
+        - source: "guid"
+          dest: "id"
           destType: "string"
+          required: true
+          pattern: ".+"
+          replacement: "ds_billedsamling_$0"
+
+        - source: "Titel"
           dest: "title"
+          destType: "string"
+
         - source: "Item Creation Date"
-          destType: "datetime"
           dest: "created_date"
+          destType: "datetime"
           destFallback: "created_date_verbatim"
+
         - source: "År"
-          destType: "datetimeRange"
           dest: "datetime"
+          destType: "datetimeRange"
           destFallback: "datetime_verbatim"
+
+        - source: "Categories"
+          dest: "keyword"
+          destType: "string"
+          lineBreakIsMulti: true
+
+        - source: "Emneord"
+          dest: "subject"
+          destType: "string"
+          lineBreakIsMulti: true
+
+        - source: "Ophav"
+          dest: "author"
+          destType: "string"
+          lineBreakIsMulti: true
+
+        - source: "Copyright"
+          dest: "license"
+          destType: "string"

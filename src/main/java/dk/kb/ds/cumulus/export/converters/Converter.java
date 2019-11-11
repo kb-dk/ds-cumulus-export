@@ -157,7 +157,7 @@ public abstract class Converter {
         }
         if (required && value == null) {
             throw new IllegalStateException(
-                "The required field '" + sourceType + "' was not present in the record");
+                "The required field '" + source + "' was not present in the record");
         }
         return value;
     }
