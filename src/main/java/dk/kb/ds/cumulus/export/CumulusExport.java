@@ -93,7 +93,7 @@ public class CumulusExport {
                     {keyword, "keyword"},
                     {subject, "subject"},
                     {license, "license"},
-                    {image_url, "image_url"},
+                    {image_url, "image_preview"},
                     {datetime, "datetime"},
                     {datetime_verbatim, "datetime_verbatim"},
                     {author, "author"}
