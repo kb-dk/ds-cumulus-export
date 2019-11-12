@@ -43,3 +43,9 @@ digisam:
         - source: "Copyright"
           dest: "license"
           destType: "string"
+
+        - source: "Asset Reference"
+          dest: "image_preview"
+          destType: "string"
+          pattern: "^.*:/Depot/DAMX/Online_Master_Arkiv(.*)-tif$"
+          replacement: "https://kb-images.kb.dk/DAMJP2/online_master_arkiv/$1/full!345,2555/0/native.jpg"
