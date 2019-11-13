@@ -53,6 +53,24 @@ class StringConverterTest {
     }
 
     @Test
+    public void testAssetReferenceSource() {
+        Map<String, Object> conf = new LinkedHashMap<>();
+        conf.put(Converter.CONF_SOURCE, "mySource");
+        conf.put(Converter.CONF_SOURCE_TYPE, Converter.SOURCE_TYPE.assetReference);
+        conf.put(Converter.CONF_DEST, "myDest");
+        conf.put(Converter.CONF_DEST_TYPE, "string");
+
+        StringConverter single = new StringConverter(new YAML(conf));
+        CumulusRecordMock record = new CumulusRecordMock("mySource", "foo");
+        FieldMapper.FieldValues singleFV = new FieldMapper.FieldValues();
+        single.convert(record, singleFV);
+
+        DSAsserts.assertFieldValues(
+            singleFV,
+            "myDest", "foo");
+    }
+
+    @Test
     public void testIDConversion() {
         Map<String, Object> conf = new LinkedHashMap<>();
         conf.put(Converter.CONF_SOURCE, "guid");
