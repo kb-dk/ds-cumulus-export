@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Produces a Map of {@link Converter}s based on a YAML configuration.
@@ -59,8 +60,15 @@ public class ConverterFactory {
      * Find all classes implementing {@link Converter} and makes them register in this factory.
      */
     static {
-        Reflections reflections = new Reflections("");
+        log.debug("Scanning for implementations of class 'Converter'");
+        Reflections reflections = new Reflections("dk"); // The prefix ("scan URLs") must not be empty!?
         Set<Class<? extends Converter>> classes = reflections.getSubTypesOf(Converter.class);
+        if (classes.isEmpty()) {
+            log.error("No implementations of class 'Converter' located. It is highly improbably that the " +
+                      "DS Cumulus Exporter will function");
+        } else {
+            log.info("Registering {} implementations of class 'Converter'", classes.size());
+        }
         for (Class<? extends Converter> c: classes) {
             try {
                 c.getMethod("register").invoke(null);
@@ -76,10 +84,10 @@ public class ConverterFactory {
      * @param converterConfig a YAML file specifying conversions.
      *                        See ds-cumulus-export-default-mapping.yml in the test folder for a sample setup.
      * @param mapName the name of the map in the given converterConfig to use. Default is "default".
-     * @return a map with Converters as specified in converterConfig.
+     * @return a list with Converters as specified in converterConfig.
      * @throws IOException if the configuration could not be resolved/fetched.
      */
-    public static Map<String, Converter> build(String converterConfig, String mapName) throws IOException {
+    public static List<Converter> build(String converterConfig, String mapName) throws IOException {
         if (mapName == null) {
             mapName = DEFAULT_MAP;
         }
@@ -94,17 +102,15 @@ public class ConverterFactory {
     /**
      * Creates a Map of {@link Converter}s from the given configuration.
      * @param mapConfig the conversions.
-     * @return a map with Converters as specified in mapConfig.
+     * @return a list with Converters as specified in mapConfig.
      */
-    public static Map<String, Converter> build(YAML mapConfig) {
+    public static List<Converter> build(YAML mapConfig) {
         List<YAML> converterConfigs = mapConfig.getYAMLList(CONF_CONVERTERS);
-        log.debug("Got {} converter configurations", converterConfigs.size());
+        log.debug("Creating {} mappings from provided converter configurations", converterConfigs.size());
 
-        Map<String, Converter> converters = new HashMap<>(converterConfigs.size());
-        converterConfigs.stream().
+        return converterConfigs.stream().
             map(ConverterFactory::buildConverter).
-            forEach(conv -> converters.put(conv.source, conv));
-        return converters;
+            collect(Collectors.toList());
     }
 
     private static Converter buildConverter(YAML converterConfig) {
@@ -116,6 +122,11 @@ public class ConverterFactory {
         return creator.apply(converterConfig);
     }
 
+    /**
+     * Callback for {@link Converter} implementations to register at this factory.
+     * @param destType the destination type for the Converter
+     * @param cc a Converter Creator
+     */
     public static void registerCreator(String destType, Function<YAML, Converter> cc) {
         if (creators.containsKey(destType)) {
             throw new IllegalArgumentException(
@@ -123,7 +134,7 @@ public class ConverterFactory {
                 " for that type is already registered. Existing creator: " + creators.get(destType) +
                 ", new creator: " + cc);
         }
-        log.info("Registering ConverterCreator for destination type " + destType);
+        log.info("Registering ConverterCreator for destination type '" + destType + "'");
         creators.put(destType, cc);
     }
 

@@ -23,7 +23,7 @@ class FieldMapperTest {
     @Test
     public void testBasicMapping() throws IOException {
         CumulusRecordMock record = new CumulusRecordMock(
-            "guid", "myID",
+            "guid", "Uid:dk:kb:doms:2007-01/b29e6d60-717e-11e0-82d7-002185371280",
             "Titel", "myTitle",
             "År", "2019-11-11",
             "Item Creation Date", "Fri Oct 04 10:05:10 CET 2019",
@@ -37,7 +37,7 @@ class FieldMapperTest {
 
         DSAsserts.assertFieldValues(
             fieldValues,
-            "id", "ds_billedsamling_myID",
+            "id", "ds_billedsamling_b29e6d60-717e-11e0-82d7-002185371280",
             "title", "myTitle",
             "datetime", "2019-11-11",
             "created_date", "2019-10-04T08:05:10Z",

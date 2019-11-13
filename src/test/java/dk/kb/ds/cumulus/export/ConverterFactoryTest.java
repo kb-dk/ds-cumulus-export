@@ -5,9 +5,9 @@ import dk.kb.ds.cumulus.export.converters.ConverterFactory;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.util.Map;
+import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /*
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,7 +27,7 @@ class ConverterFactoryTest {
 
     @Test
     public void testDefaultFactory() throws IOException {
-        Map<String, Converter> converters =
+        List<Converter> converters =
             ConverterFactory.build("ds-cumulus-export-default-mapping.yml", null);
         assertTrue(converters.size() > 0, "There should be at least 1 converter, but there was 0");
     }

@@ -35,7 +35,8 @@ import java.util.stream.Stream;
 public class FieldMapper implements Function<CumulusRecord, FieldMapper.FieldValues> {
     private static final Logger log = LoggerFactory.getLogger(FieldMapper.class);
 
-    private final Map<String, Converter> converters;
+    private final Map<String, String> staticFields = new LinkedHashMap<>();
+    private final List<Converter> converters;
 
     /**
      * Loads a {@link ConverterFactory} setup, as specified in the base configuration, and constructs a field mapper.
@@ -52,7 +53,17 @@ public class FieldMapper implements Function<CumulusRecord, FieldMapper.FieldVal
     }
 
     /**
+     * Static field-values will be added to all outputs when {@link #apply(CumulusRecord)} is called.
+     * @param field a static field, such as {@code collection}.
+     * @param value a static value, such as {@code Samlingsbilleder}-
+     */
+    public void putStatic(String field, String value) {
+       staticFields.put(field, value);
+    }
+
+    /**
      * Applies the configured {@link Converter}s to the given record.
+     * Note: Field-values added with {@link #putStatic(String, String)} will also be added.
      * @param record a Cumulus record.
      * @return a list of field-value pairs.
      * @throws IllegalArgumentException if a combination of input and processing was not valid.
@@ -61,9 +72,10 @@ public class FieldMapper implements Function<CumulusRecord, FieldMapper.FieldVal
     @Override
     public FieldValues apply(CumulusRecord record) {
         FieldValues fieldValues = new FieldValues();
-        converters.forEach((n, c) -> c.convert(record, fieldValues));
+        converters.forEach(c -> c.convert(record, fieldValues));
         log.trace("Produced {} fieldValues for the given record", fieldValues.size());
-
+        staticFields.forEach((f, v) -> fieldValues.add(new FieldValue(f, v)));
+        log.trace("Added {} static fieldValues to the given record", staticFields.size());
         return fieldValues;
     }
 
