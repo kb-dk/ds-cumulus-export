@@ -149,7 +149,7 @@ public abstract class Converter {
                 if (assetReference == null) {
                     break;
                 }
-                // TODO: Test that the displayString is usable
+                // Old code: record.getAssetReference("Asset Reference").getPart(0).getDisplayString()
                 value = assetReference.getDisplayString();
                 break;
             }
