@@ -141,7 +141,8 @@ public abstract class Converter {
         String value = null;
         switch (sourceType) {
             case string: {
-                value = record.getFieldValueOrNull(source);
+                //value = record.getFieldValueOrNull(source);
+                value = record.getFieldValueForNonStringField(source);
                 break;
             }
             case assetReference: {
