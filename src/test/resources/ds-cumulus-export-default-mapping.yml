@@ -8,8 +8,10 @@ digisam:
           dest: "id"
           destType: "string"
           required: true
-          pattern: ".+"
-          replacement: "ds_billedsamling_$0"
+          # Uid:dk:kb:doms:2007-01/b29e6d60-717e-11e0-82d7-002185371280
+          pattern: ".+([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})"
+          # ds_billedsamling_b29e6d60-717e-11e0-82d7-002185371280
+          replacement: "ds_billedsamling_$1"
 
         - source: "Titel"
           dest: "title"
