@@ -326,8 +326,7 @@ public class YAML extends LinkedHashMap<String, Object> {
             log.debug("Looking for '" + resourceName + "' on the user home path");
             Path configPath = Path.of(System.getProperty("user.home"), resourceName);
             if (!configPath.toFile().exists()) {
-                String message = "Unable to locate '" + resourceName + "' on the classpath or in user.home, " +
-                                 "unable to continue";
+                String message = "Unable to locate '" + resourceName + "' on the classpath or in user.home";
                 log.error(message);
                 throw new FileNotFoundException(message);
             }
