@@ -125,6 +125,14 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/org.objenesis/objenesis -->
+        <dependency>
+            <groupId>org.objenesis</groupId>
+            <artifactId>objenesis</artifactId>
+            <version>3.1</version>
+            <scope>test</scope>
+        </dependency>
+
         <!-- Needs to be installed from https://github.com/Det-Kongelige-Bibliotek/KB-Cumulus-API with
              mvn install -->
         <dependency>

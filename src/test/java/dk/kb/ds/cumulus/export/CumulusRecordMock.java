@@ -14,19 +14,25 @@
  */
 package dk.kb.ds.cumulus.export;
 
+import com.canto.cumulus.CumulusSession;
 import com.canto.cumulus.GUID;
 import com.canto.cumulus.fieldvalue.AssetReference;
 import dk.kb.cumulus.CumulusRecord;
 import dk.kb.cumulus.field.Field;
+import org.objenesis.Objenesis;
+import org.objenesis.ObjenesisStd;
+import org.objenesis.instantiator.ObjectInstantiator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import sun.misc.Unsafe;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 import java.io.File;
 import java.io.OutputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -51,7 +57,7 @@ public class CumulusRecordMock extends CumulusRecord {
                 "There must be an even number of keyValues, but there was " + keyValues.length);
         }
         for (int i = 0 ; i < keyValues.length ; i+=2) {
-            put(keyValues[i], keyValues[i+1]);
+            content.put(keyValues[i], keyValues[i+1]);
         }
     }
 
@@ -76,7 +82,7 @@ public class CumulusRecordMock extends CumulusRecord {
 
     @Override
     public String getFieldValue(String fieldname) {
-        return content.get("fieldName");
+        return content.get(fieldname);
     }
 
     @Override
@@ -101,7 +107,29 @@ public class CumulusRecordMock extends CumulusRecord {
 
     @Override
     public AssetReference getAssetReference(String fieldname) {
-        throw new UnsupportedOperationException("Not yet implemented in the CumulurRecord mocker");
+        AssetReferenceMock ar = (AssetReferenceMock)arInstantiator.newInstance();
+        ar.setDisplayString(getFieldValue(fieldname));
+        return ar;
+    }
+    // The mess below is because the AssetReference does not have an empty constructor
+    Objenesis objenesis = new ObjenesisStd();
+    ObjectInstantiator arInstantiator = objenesis.getInstantiatorOf(AssetReferenceMock.class);
+    private class AssetReferenceMock extends AssetReference {
+        private String displayString = null;
+        public AssetReferenceMock(CumulusSession session, String pathNameOrXML, String assetHandlingSet) {
+            super(session, pathNameOrXML, assetHandlingSet);
+            throw new IllegalStateException(
+                "The constructor should never be called. Only for use with ObjectInstantiator");
+        }
+
+        public void setDisplayString(String displayString) {
+            this.displayString = displayString;
+        }
+
+        @Override
+        public String getDisplayString() {
+            return displayString;
+        }
     }
 
     @Override
