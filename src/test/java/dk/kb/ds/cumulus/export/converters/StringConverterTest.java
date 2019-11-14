@@ -31,6 +31,7 @@ class StringConverterTest {
         conf.put(Converter.CONF_SOURCE, "mySource");
         conf.put(Converter.CONF_DEST, "myDest");
         conf.put(Converter.CONF_DEST_TYPE, "string");
+        conf.put(Converter.CONF_LINE_BREAK_IS_MULTI, false);
         {
             StringConverter single = new StringConverter(new YAML(conf));
             CumulusRecordMock record = new CumulusRecordMock("mySource", "foo\nbar");

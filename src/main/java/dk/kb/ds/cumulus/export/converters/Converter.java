@@ -34,13 +34,16 @@ public abstract class Converter {
     public static final String CONF_SOURCE =                 "source";
     public static final String CONF_SOURCE_TYPE =            "sourceType";
     public static final String DEFAULT_SOURCE_TYPE =         "string";
+
     public static final String CONF_DEST =                   "dest";
     public static final String CONF_FALLBACK_DEST =          "fallbackDest";
     public static final String CONF_DEST_TYPE =              "destType";
-    public static final String CONF_REQUIRED =               "required";
+    public static final String DEFAULT_DEST_TYPE =           "string";
+
+    public static final String  CONF_REQUIRED =              "required";
     public static final boolean DEFAULT_REQUIRED =            false;
-    public static final String CONF_LINE_BREAK_IS_MULTI =    "lineBreakIsMulti";
-    public static final boolean DEFAULT_LINE_BREAK_IS_MULTI = false;
+    public static final String  CONF_LINE_BREAK_IS_MULTI =   "lineBreakIsMulti";
+    public static final boolean DEFAULT_LINE_BREAK_IS_MULTI = true;
 
 
     public enum SOURCE_TYPE {string, assetReference}
@@ -49,7 +52,7 @@ public abstract class Converter {
     public final SOURCE_TYPE sourceType; // Default is string
     public final String destination;
     public final String fallbackDestination;
-    public final String destinationType;
+    public final String destinationType; // Default is string
     public final boolean required;
     public final boolean linebreakIsMulti;
 
@@ -61,7 +64,7 @@ public abstract class Converter {
         this(config.getString(CONF_SOURCE, DEFAULT_SOURCE_TYPE),
              config.containsKey(CONF_SOURCE_TYPE) ? SOURCE_TYPE.valueOf(config.getString(CONF_SOURCE_TYPE)) : null,
              config.getString(CONF_DEST), config.getString(CONF_FALLBACK_DEST),
-             config.getString(CONF_DEST_TYPE),
+             config.getString(CONF_DEST_TYPE, DEFAULT_DEST_TYPE),
              config.getBoolean(CONF_REQUIRED, DEFAULT_REQUIRED),
              config.getBoolean(CONF_LINE_BREAK_IS_MULTI, DEFAULT_LINE_BREAK_IS_MULTI)
              );
@@ -85,7 +88,7 @@ public abstract class Converter {
         this.sourceType = sourceType == null ? SOURCE_TYPE.string : sourceType;
         this.destination = destination;
         this.fallbackDestination = fallbackDestination;
-        this.destinationType = destinationType;
+        this.destinationType = destinationType == null ? DEFAULT_DEST_TYPE : destinationType;
         this.required = required;
         this.linebreakIsMulti = lineBreakIsMulti;
     }

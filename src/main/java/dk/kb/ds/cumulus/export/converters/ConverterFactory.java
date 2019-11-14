@@ -114,7 +114,7 @@ public class ConverterFactory {
     }
 
     private static Converter buildConverter(YAML converterConfig) {
-        final String destType = converterConfig.getString("destType");
+        final String destType = converterConfig.getString("destType", Converter.DEFAULT_DEST_TYPE);
         Function<YAML, Converter> creator = creators.get(destType);
         if (creator == null) {
             throw new IllegalArgumentException("Unsupported destination type '" + destType + "'");

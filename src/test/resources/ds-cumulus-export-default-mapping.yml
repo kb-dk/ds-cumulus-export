@@ -1,12 +1,38 @@
 # Field mapping and conversion configuration. Place the file as "ds-cumulus-export-default-mapping.yml"
 # on the classpath or in user.home.
+
+# Shared attributes for converters are
+# source:       The Cumulus field to extract metadata from.
+# sourceType:   The type of Cumulus field to extract metadata from.
+#               If "string" is used, the metadata getter tries to deliver a String independent
+#               of the Cumulus type (integers will be deliveres as Strings etc.).
+#               Possible values are "string" and "assetReference", with "string" as default.
+# dest:         The Solr field to store the converted metadata to.
+# destFallback: If the metadata could not be processed (illegal date or similar), it is stored to
+#               this field instead of the dest field.
+# destType:     The Solr field type, which also selects the Converter-implementation to use.
+#               The number of destTypes is expected to be expanded.
+#               Current possible values are "string", "datetime" and "datetimeRange", with "string" as default.
+# required:     If true, the source MUST be present in the Cumulus record for the conversion of the record to pass.
+#               Possible values are true and false, with false as default.
+# lineBreakIsMulti: If true, the values delivered by a Converter are splint on newline and each line added separately.
+#               This reflects the way that most Cumulus fields handle multiple values, as Cumulus has no explicit
+#               support for multi valued fields. Comment- or note-fields in Cumulus are an exception to this.
+#               Possible values are true and false, with true as default.
+#
+# Special attributes for the string converter are
+# pattern:      A regular expression, which must match the source metadata before it is stored in dest.
+# replacement:  Requires pattern to be defined. Used with Java Matcher.replaceAll.
+#               See https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/regex/Matcher.html#replaceAll(java.lang.String)
+#               $0 refers to the full match while $1, $2, ..., $n refers to matching groups.
+#     Example: pattern="[^0-9]*([0-9]{4}).*", replacement="Scanned anno $1"
+#     will extract the first 4 consecutive digits in the input and output "Scanned anno YYYY".
 digisam:
   maps:
     default:
       converters:
         - source: "guid"
           dest: "id"
-          destType: "string"
           required: true
           # Uid:dk:kb:doms:2007-01/b29e6d60-717e-11e0-82d7-002185371280
           pattern: ".+([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})"
@@ -15,7 +41,6 @@ digisam:
 
         - source: "Titel"
           dest: "title"
-          destType: "string"
 
         - source: "Item Creation Date"
           dest: "created_date"
@@ -29,38 +54,31 @@ digisam:
 
         - source: "Categories"
           dest: "keyword"
-          destType: "string"
-          lineBreakIsMulti: true
 
         - source: "Emneord"
           dest: "subject"
-          destType: "string"
-          lineBreakIsMulti: true
 
         - source: "Ophav"
           dest: "author"
-          destType: "string"
-          lineBreakIsMulti: true
 
         - source: "Copyright"
           dest: "license"
-          destType: "string"
+          lineBreakIsMulti: false
 
         - source: "Asset Reference"
           dest: "image_preview"
-          destType: "string"
           pattern: "^.*:/Depot/DAMX/Online_Master_Arkiv/(.*).tif"
           replacement: "https://kb-images.kb.dk/DAMJP2/online_master_arkiv/$1/full/!345,2555/0/native.jpg"
 
         - source: "Asset Reference"
           dest: "image_full"
-          destType: "string"
           pattern: "^.*:/Depot/DAMX/Online_Master_Arkiv/(.*).tif"
           replacement: "https://kb-images.kb.dk/DAMJP2/online_master_arkiv/$1/full/full/0/default.jpg"
+          lineBreakIsMulti: false
 
         - source: "Asset Reference"
           sourceType: "assetReference"
           dest: "iiif"
-          destType: "string"
           pattern: "^.*:/Depot/DAMX/Online_Master_Arkiv/(.*).tif"
           replacement: "https://kb-images.kb.dk/DAMJP2/online_master_arkiv/$1/"
+          lineBreakIsMulti: false
