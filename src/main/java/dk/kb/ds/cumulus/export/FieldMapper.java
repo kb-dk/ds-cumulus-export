@@ -64,15 +64,21 @@ public class FieldMapper implements Function<CumulusRecord, FieldMapper.FieldVal
     /**
      * Applies the configured {@link Converter}s to the given record.
      * Note: Field-values added with {@link #putStatic(String, String)} will also be added.
+     * If a record cannot be processed by any reason, processing errors will be logged and null returned.
      * @param record a Cumulus record.
-     * @return a list of field-value pairs.
+     * @return a list of field-value pairs or null if processing errors occured.
      * @throws IllegalArgumentException if a combination of input and processing was not valid.
      * @throws IllegalStateException if a required field was not present in the record.
      */
     @Override
     public FieldValues apply(CumulusRecord record) {
         FieldValues fieldValues = new FieldValues();
-        converters.forEach(c -> c.convert(record, fieldValues));
+        try {
+            converters.forEach(c -> c.convert(record, fieldValues));
+        } catch (IllegalArgumentException|IllegalStateException e) {
+            log.warn("Unable to process Cumulus record. Extracted so far: " + fieldValues, e);
+            return null;
+        }
         log.trace("Produced {} fieldValues for the given record", fieldValues.size());
         staticFields.forEach((f, v) -> fieldValues.add(new FieldValue(f, v)));
         log.trace("Added {} static fieldValues to the given record", staticFields.size());
@@ -95,6 +101,21 @@ public class FieldMapper implements Function<CumulusRecord, FieldMapper.FieldVal
             rootElement.appendChild(docElement);
 
             forEach(fv -> fv.toDoc(docElement));
+        }
+
+        public String toString() {
+            StringBuffer sb = new StringBuffer();
+            stream().limit(20).forEach(fv -> {
+                if (sb.length() != 0) {
+                    sb.append(", ");
+                }
+                sb.append(fv.field).append(":").
+                    append(fv.value.length() > 50 ? fv.value.substring(0, 50) + "..." : fv.value);
+            });
+            if (size() > 20) {
+                sb.append(", ...(").append(size() - 20).append(" field-values more)");
+            }
+            return "FieldValues(" + sb.toString() + ")";
         }
     }
 

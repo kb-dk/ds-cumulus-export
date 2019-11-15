@@ -22,6 +22,7 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.stream.StreamSupport;
 
@@ -43,7 +44,7 @@ public class CumulusExport {
             //Select the first Cumulus catalog from the configuration
             String myCatalog = Configuration.getCumulusConf().getCatalogs().get(0);
             CumulusQuery query = CumulusQuery.getQueryForAllInCatalog(myCatalog);
-            log.debug("Requesting catalog '{}' with query '{}' from server", myCatalog, query);
+            log.info("Requesting catalog '{}' with query '{}' from server", myCatalog, query);
             CumulusRecordCollection recordCollection = server.getItems(myCatalog, query);
 
             File outputFile = new File(Configuration.getOutputFile());
@@ -56,14 +57,16 @@ public class CumulusExport {
             Element rootElement = document.createElement("add");
             document.appendChild(rootElement);
 
+            // collection and type are mandatory fields in the Digisam Solr setup
             final FieldMapper fieldMapper = new FieldMapper();
             fieldMapper.putStatic("collection", convertCollectionToSolrFormat(Configuration.getCollection()));
             fieldMapper.putStatic("type", getConfigurationType());
 
             StreamSupport.stream(recordCollection.spliterator(), false).
-                limit(limited ? counter : Long.MAX_VALUE).
-                map(fieldMapper).
-                forEach(fv -> fv.toDoc(rootElement));
+                limit(limited ? counter : Long.MAX_VALUE). // For testing purposes
+                map(fieldMapper).                          // Cumulus record -> FieldValues object
+                filter(Objects::nonNull).                  // Records that failed conversion are propagated as null
+                forEach(fv -> fv.toDoc(rootElement));      // Add to DOM
 
             // save the content to xml-file with specific formatting
             TransformerFactory transformerFactory = TransformerFactory.newInstance();
@@ -77,20 +80,14 @@ public class CumulusExport {
         }
     }
 
-    private static String getFallbackString(String fallbackString, String calcTime) {
-        if (calcTime == null) {
-            return fallbackString;
-        }
-        return null;
-    }
-
-
     // Check for valid type
     static String getConfigurationType() {
-        String retValue = Configuration.getType().toString();
+        String retValue = Configuration.getType();
         if (listOfType.contains(retValue)){
             return retValue;
         }
+        log.warn("The stated collection type '{}' was not on the approved list({}) and was substituted with 'other'",
+                 Configuration.getType(), listOfType);
         return "other";
     }
 
