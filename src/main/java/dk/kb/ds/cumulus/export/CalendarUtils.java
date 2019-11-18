@@ -29,7 +29,7 @@ public class CalendarUtils {
     /** A single instance of the DatatypeFactory to prevent overlap from recreating it too often.*/
     private static DatatypeFactory factory = null;
 
-    private static final String TO = " TO ";
+    private static final String DATE_RANGE_PATTERN = "[%s TO %s]";
     private static final String DASH = "-";
 
     /**
@@ -171,13 +171,12 @@ public class CalendarUtils {
     private static String parseYearToYear(String datetime) {
         Matcher yyMatcher = YEAR_TO_YEAR.matcher(datetime);
         if (yyMatcher.matches()) {
-            return yyMatcher.group(1)
-                + TO + yyMatcher.group(2);
+            return String.format(DATE_RANGE_PATTERN, yyMatcher.group(1), yyMatcher.group(2));
         }
         yyMatcher = YEAR_RANGE_PATTERN.matcher(datetime);
         if (yyMatcher.matches()){
-            return yyMatcher.group(1)
-                + TO + yyMatcher.group(1).substring(0,2) + yyMatcher.group(2);
+            return String.format(DATE_RANGE_PATTERN,
+                                 yyMatcher.group(1), yyMatcher.group(1).substring(0,2) + yyMatcher.group(2));
         }
 
         log.trace("parseYearToYear({}) failed parsing", datetime);
