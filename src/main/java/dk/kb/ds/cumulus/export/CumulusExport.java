@@ -22,7 +22,9 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Properties;
+import java.util.stream.StreamSupport;
 
 public class CumulusExport {
     // List of valid types
@@ -42,9 +44,10 @@ public class CumulusExport {
             //Select the first Cumulus catalog from the configuration
             String myCatalog = Configuration.getCumulusConf().getCatalogs().get(0);
             CumulusQuery query = CumulusQuery.getQueryForAllInCatalog(myCatalog);
+            log.info("Requesting catalog '{}' with query '{}' from server", myCatalog, query);
             CumulusRecordCollection recordCollection = server.getItems(myCatalog, query);
 
-            File outputFile = new File(Configuration.getOutputFile().toString());
+            File outputFile = new File(Configuration.getOutputFile());
             OutputStream out = new FileOutputStream(outputFile);
             ArgumentCheck.checkNotNull(out, "OutputStream out");
             DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
@@ -53,65 +56,18 @@ public class CumulusExport {
 
             Element rootElement = document.createElement("add");
             document.appendChild(rootElement);
-            // Get configurations
-            String collection = convertCollectionToSolrFormat(Configuration.getCollection().toString()) ;
-            String type = getConfigurationType();
-            String created_date_verbatim = null;
-            String datetime_verbatim = null;
-            String image_url = "";
 
-            int loop_counter = 0;
-            for (CumulusRecord record : recordCollection) {
-                Element docElement = document.createElement("doc");
-                rootElement.appendChild(docElement);
+            // collection and type are mandatory fields in the Digisam Solr setup
+            final FieldMapper fieldMapper = new FieldMapper();
+            fieldMapper.putStatic("collection", convertCollectionToSolrFormat(Configuration.getCollection()));
+            fieldMapper.putStatic("type", getConfigurationType());
 
-                // Get  metadata from Cumulus
-                String id = "ds_" + collection + "_" + record.getFieldValueOrNull("guid");
-                String title = record.getFieldValueOrNull("Titel");
-                String creationDateFromCumulus = record.getFieldValueForNonStringField("Item Creation Date");
-                String created_date = CalendarUtils.getUTCTime(creationDateFromCumulus);
-                created_date_verbatim = getFallbackString(creationDateFromCumulus, created_date);
-                String keyword = record.getFieldValueOrNull("Categories");
-                String subject = record.getFieldValueOrNull("Emneord");
-                String license = record.getFieldValueForNonStringField("Copyright");
-                String url = record.getAssetReference("Asset Reference").getPart(0).getDisplayString();
-                if (url != null || url != "") {
-                    image_url = ImageUrl.makeUrl(url);
-                }
-                String datetimeFromCumulus = record.getFieldValueOrNull("År");
-                String datetime = CalendarUtils.getUTCTimeRange(datetimeFromCumulus);
-                datetime_verbatim = getFallbackString(datetimeFromCumulus, datetime);
-                String author = record.getFieldValueOrNull("Ophav");
+            StreamSupport.stream(recordCollection.spliterator(), false).
+                limit(limited ? counter : Long.MAX_VALUE). // For testing purposes
+                map(fieldMapper).                          // Cumulus record -> FieldValues object
+                filter(Objects::nonNull).                  // Records that failed conversion are propagated as null
+                forEach(fv -> fv.toDoc(rootElement));      // Add to DOM
 
-                final String[][] ATTRIBUTES = new String[][]{
-                    {id, "id"},
-                    {collection, "collection"},
-                    {type, "type"},
-                    {title, "title"},
-                    {created_date, "created_date"},
-                    {created_date_verbatim, "created_date_verbatim"},
-                    {keyword, "keyword"},
-                    {subject, "subject"},
-                    {license, "license"},
-                    {image_url, "image_preview"},
-                    {datetime, "datetime"},
-                    {datetime_verbatim, "datetime_verbatim"},
-                    {author, "author"}
-                };
-                //Add  attributes to xml-file
-                for ( String[] attributes : ATTRIBUTES){
-                    if (attributes[0] != null){
-                        Element fieldElement = document.createElement("field");
-                        fieldElement.setAttribute("name", attributes[1]);
-                        docElement.appendChild(fieldElement);
-                        fieldElement.appendChild(document.createTextNode(attributes[0]));
-                    }
-                }
-                // TODO: remember to set limited to false in production
-                loop_counter++;
-                if (limited && (loop_counter >= counter))
-                    break;
-            }
             // save the content to xml-file with specific formatting
             TransformerFactory transformerFactory = TransformerFactory.newInstance();
             Transformer transformer = transformerFactory.newTransformer();
@@ -124,20 +80,14 @@ public class CumulusExport {
         }
     }
 
-    private static String getFallbackString(String fallbackString, String calcTime) {
-        if (calcTime == null) {
-            return fallbackString;
-        }
-        return null;
-    }
-
-
     // Check for valid type
     static String getConfigurationType() {
-        String retValue = Configuration.getType().toString();
+        String retValue = Configuration.getType();
         if (listOfType.contains(retValue)){
             return retValue;
         }
+        log.warn("The stated collection type '{}' was not on the approved list({}) and was substituted with 'other'",
+                 Configuration.getType(), listOfType);
         return "other";
     }
 
