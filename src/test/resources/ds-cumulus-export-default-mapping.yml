@@ -70,8 +70,9 @@ digisam:
           destType: "url"
           pattern: "^.*:/Depot/DAMX/Online_Master_Arkiv/(.*).tif"
           replacement: "https://kb-images.kb.dk/DAMJP2/online_master_arkiv/$1/full/!345,2555/0/native.jpg"
-          verifyPattern: "^https?://(?:www[.])?(.+)" # There is a problem with the certificate so we use plain HTTP
-          verifyReplacement: "http://www.$1"
+          verifyPattern: "^https?(.+)" # There is a problem with the certificate so we use plain HTTP
+          verifyReplacement: "http$1"
+          required: true
 
         - source: "Asset Reference"
           dest: "image_full"
