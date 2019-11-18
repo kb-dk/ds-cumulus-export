@@ -74,7 +74,9 @@ public class ConverterFactory {
                 c.getMethod("register").invoke(null);
             } catch (Exception e) {
                 throw new Error(
-                    "Cannot invoke 'register' method on Converter-implementing class '" + c.getName() + "'");
+                    "Cannot invoke 'register' method on Converter-implementing class '" + c.getName() +
+                    "'. This is likely because a new Converter has been added and the author forgot to add the" +
+                    "'register' method");
             }
         }
     }
