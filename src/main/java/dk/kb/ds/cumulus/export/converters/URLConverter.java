@@ -68,12 +68,12 @@ public class URLConverter extends StringConverter {
         final String url = super.convertImpl(input);
 
         if (url == null || !verifyURL) {
-            return input;
+            return url;
         }
         boolean ok = resolves(url);
         if (ok) {
             log.debug("Server responds HTTP 200 (OK) for '" + url + "' derived from '" + input + "'");
-            return input;
+            return url;
         }
         log.warn("No resource available for '" + url + "' derived from '" + input + "'");
         return null;
