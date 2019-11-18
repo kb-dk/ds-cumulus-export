@@ -32,6 +32,10 @@ import java.util.regex.Pattern;
 public class StringConverter extends Converter {
     private static final Logger log = LoggerFactory.getLogger(StringConverter.class);
 
+    /**
+     * If specified, the Cumulus value regexp matched against the {@code pattern} and replaced with {@code replacement}
+     * before being verified added. If the incoming values does not match, the value is not added.
+     */
     public static final String CONF_PATTERN = "pattern";
     public static final String CONF_REPLACEMENT = "replacement";
 
@@ -59,32 +63,30 @@ public class StringConverter extends Converter {
     public void convertImpl(CumulusRecord record, List<FieldMapper.FieldValue> resultList) {
         switch (sourceType) {
             case string: {
-                convertImpl(getAsString(record), resultList);
+                addValue(convertImpl(getAsString(record)), resultList);
                 break;
             }
             case assetReference: {
                 AssetReference ar = record.getAssetReference(source);
-                convertImpl(ar.getDisplayString(), resultList);
+                addValue(convertImpl(ar.getDisplayString()), resultList);
                 break;
             }
             default: throw new UnsupportedOperationException("The source type '" + sourceType + "' is not supported");
         }
     }
 
-    void convertImpl(String input, List<FieldMapper.FieldValue> resultList) {
-        if (input == null) {
-            return;
-        }
-        if (pattern == null) { // Plain string copying
-            addValue(input, resultList);
-            return;
-        }
+    String convertImpl(String input) {
+        return getMatchedAndReplaced(pattern, replacement, input);
+    }
 
-        // Pattern matching & replacement
-        Matcher matcher = pattern.matcher(input);
-        if (!matcher.matches()) {
-            return;
+    String getMatchedAndReplaced(Pattern pattern, String replacement, String value) {
+        if (value == null || pattern == null) {
+            return value;
         }
-        addValue(matcher.replaceAll(replacement), resultList);
+        Matcher matcher = pattern.matcher(value);
+        if (!matcher.matches()) {
+            return null;
+        }
+        return replacement == null ? value : matcher.replaceAll(replacement);
     }
 }
