@@ -14,13 +14,16 @@
  */
 package dk.kb.ds.cumulus.export;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
 import java.io.IOException;
 
 class FieldMapperTest {
 
+    /**
+     * This test uses the ds-cumulus-export-default-mapping.yml configuration from test/resources.
+     */
     @Test
     public void testBasicMapping() throws IOException {
         CumulusRecordMock record = new CumulusRecordMock(
@@ -36,6 +39,7 @@ class FieldMapperTest {
         );
         FieldMapper mapper = new FieldMapper();
         FieldMapper.FieldValues fieldValues = mapper.apply(record);
+        Assertions.assertNotNull(fieldValues, "The FieldMapper should produce fieldValues");
 
         DSAsserts.assertFieldValues(
             fieldValues,
