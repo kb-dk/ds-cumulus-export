@@ -90,3 +90,11 @@ digisam:
           pattern: "^.*:/Depot/DAMX/Online_Master_Arkiv/(.*).tif"
           replacement: "https://kb-images.kb.dk/DAMJP2/online_master_arkiv/$1/"
           lineBreakIsMulti: false
+
+        - source: "Horizontal Pixels"
+          dest: "width_pixels"
+          destType: "long"
+
+        - source: "Vertical Pixels"
+          dest: "height_pixels"
+          destType: "long"
