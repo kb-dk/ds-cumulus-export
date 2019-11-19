@@ -115,7 +115,7 @@ public class ConverterFactory {
             collect(Collectors.toList());
     }
 
-    private static Converter buildConverter(YAML converterConfig) {
+    public static Converter buildConverter(YAML converterConfig) {
         final String destType = converterConfig.getString("destType", Converter.DEFAULT_DEST_TYPE);
         Function<YAML, Converter> creator = creators.get(destType);
         if (creator == null) {

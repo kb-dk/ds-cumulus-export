@@ -38,7 +38,7 @@ class URLConverterTest {
         conf.put(Converter.CONF_DEST_TYPE, "url");
 
         {
-            Converter converter = new URLConverter(new YAML(conf));
+            Converter converter = ConverterFactory.buildConverter(new YAML(conf));
             CumulusRecordMock record = new CumulusRecordMock("mySource", "https://kb.dk/");
             FieldMapper.FieldValues fieldValues = new FieldMapper.FieldValues();
             converter.convert(record, fieldValues);
@@ -50,7 +50,7 @@ class URLConverterTest {
         conf.put(URLConverter.CONF_VERIFY_REPLACEMENT, "https://www.$1");
 
         {
-            Converter converter = new URLConverter(new YAML(conf));
+            Converter converter = ConverterFactory.buildConverter(new YAML(conf));
             CumulusRecordMock record = new CumulusRecordMock("mySource", "https://kb.dk/");
             FieldMapper.FieldValues fieldValues = new FieldMapper.FieldValues();
             converter.convert(record, fieldValues);

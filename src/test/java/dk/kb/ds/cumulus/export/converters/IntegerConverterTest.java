@@ -35,8 +35,9 @@ class IntegerConverterTest {
         Map<String, Object> conf = new LinkedHashMap<>();
         conf.put(Converter.CONF_SOURCE, "myInt");
         conf.put(Converter.CONF_DEST, "myIntDest");
+        conf.put(Converter.CONF_DEST_TYPE, "integer");
+        Converter converter = ConverterFactory.buildConverter(new YAML(conf));
 
-        Converter converter = new IntegerConverter(new YAML(conf));
         CumulusRecordMock record = new CumulusRecordMock("myInt", "123") {
             // We want to see if the Integer-returning method is called when requesting the value for the myInt field
             @Override
