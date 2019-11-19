@@ -30,10 +30,11 @@ class StringConverterTest {
         Map<String, Object> conf = new LinkedHashMap<>();
         conf.put(Converter.CONF_SOURCE, "mySource");
         conf.put(Converter.CONF_DEST, "myDest");
-        conf.put(Converter.CONF_DEST_TYPE, "string");
         conf.put(Converter.CONF_LINE_BREAK_IS_MULTI, false);
+        conf.put(Converter.CONF_DEST_TYPE, "string");
+
         {
-            StringConverter single = new StringConverter(new YAML(conf));
+            Converter single = ConverterFactory.buildConverter(new YAML(conf));
             CumulusRecordMock record = new CumulusRecordMock("mySource", "foo\nbar");
             FieldMapper.FieldValues singleFV = new FieldMapper.FieldValues();
             single.convert(record, singleFV);
@@ -44,7 +45,7 @@ class StringConverterTest {
         }
         {
             conf.put(Converter.CONF_LINE_BREAK_IS_MULTI, true);
-            StringConverter multi = new StringConverter(new YAML(conf));
+            Converter multi = ConverterFactory.buildConverter(new YAML(conf));
             CumulusRecordMock record = new CumulusRecordMock("mySource", "foo\nbar");
             FieldMapper.FieldValues multiFV = new FieldMapper.FieldValues();
             multi.convert(record, multiFV);

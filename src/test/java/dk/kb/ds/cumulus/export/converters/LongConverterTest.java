@@ -35,8 +35,9 @@ class LongConverterTest {
         Map<String, Object> conf = new LinkedHashMap<>();
         conf.put(Converter.CONF_SOURCE, "myLong");
         conf.put(Converter.CONF_DEST, "myLongDest");
+        conf.put(Converter.CONF_DEST_TYPE, "long");
+        Converter converter = ConverterFactory.buildConverter(new YAML(conf));
 
-        Converter converter = new LongConverter(new YAML(conf));
         CumulusRecordMock record = new CumulusRecordMock("myLong", "123") {
             // We want to see if the Integer-returning method is called when requesting the value for the myLong field
             @Override
