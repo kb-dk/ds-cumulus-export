@@ -47,7 +47,7 @@ class URLConverterTest {
         }
 
         conf.put(URLConverter.CONF_VERIFY_PATTERN, "^https?://(?:www[.])?(.+)");
-        conf.put(URLConverter.CONF_VERIFY_REPLACEMENT, "http://www.$1");
+        conf.put(URLConverter.CONF_VERIFY_REPLACEMENT, "https://www.$1");
 
         {
             Converter converter = new URLConverter(new YAML(conf));
