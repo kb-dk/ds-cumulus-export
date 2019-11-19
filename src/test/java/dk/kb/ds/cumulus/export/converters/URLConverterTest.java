@@ -27,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 class URLConverterTest {
     /**
-     * This test relies on the current (2019-11-18) behaviour of https://kb.dk/ which does not return HTTP 200,
+     * This test relies on the current (2019-11-19) behaviour of https://kb.dk/ which does not return HTTP 200,
      * while http://www.kb.dk/ does return HTTP 200. This is unreliable and should be mocked instead.
      */
     @Test
