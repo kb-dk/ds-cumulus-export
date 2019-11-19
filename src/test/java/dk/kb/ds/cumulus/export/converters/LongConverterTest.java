@@ -24,25 +24,25 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class IntegerConverterTest {
+class LongConverterTest {
 
     @Test
-    public void testInteger() {
-        final AtomicInteger getIntCalledCounter = new AtomicInteger(0);
+    public void testLong() {
+        final AtomicInteger getLongCalledCounter = new AtomicInteger(0);
 
         Map<String, Object> conf = new LinkedHashMap<>();
-        conf.put(Converter.CONF_SOURCE, "myInt");
-        conf.put(Converter.CONF_DEST, "myIntDest");
+        conf.put(Converter.CONF_SOURCE, "myLong");
+        conf.put(Converter.CONF_DEST, "myLongDest");
 
-        Converter converter = new IntegerConverter(new YAML(conf));
-        CumulusRecordMock record = new CumulusRecordMock("myInt", "123") {
-            // We want to see if the Integer-returning method is called when requesting the value for the myInt field
+        Converter converter = new LongConverter(new YAML(conf));
+        CumulusRecordMock record = new CumulusRecordMock("myLong", "123") {
+            // We want to see if the Integer-returning method is called when requesting the value for the myLong field
             @Override
-            public Integer getFieldIntValue(String fieldname) {
-                getIntCalledCounter.incrementAndGet();
-                return super.getFieldIntValue(fieldname);
+            public Long getFieldLongValue(String fieldname) {
+                getLongCalledCounter.incrementAndGet();
+                return super.getFieldLongValue(fieldname);
             }
         };
         FieldMapper.FieldValues fieldValues = new FieldMapper.FieldValues();
@@ -50,9 +50,9 @@ class IntegerConverterTest {
 
         DSAsserts.assertFieldValues(
             fieldValues,
-            "myIntDest", "123");
+            "myLongDest", "123");
 
-        assertEquals(1, getIntCalledCounter.get(),
-                     "The getFieldIntValue should be called the expected number of times");
+        assertEquals(1, getLongCalledCounter.get(),
+                     "The getFieldLongValue should be called the expected number of times");
     }
 }

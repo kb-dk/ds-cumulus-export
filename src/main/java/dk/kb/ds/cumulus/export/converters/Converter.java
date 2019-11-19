@@ -45,7 +45,18 @@ public abstract class Converter {
     public static final boolean DEFAULT_LINE_BREAK_IS_MULTI = true;
 
 
-    public enum SOURCE_TYPE {string, integer, assetReference}
+    public enum SOURCE_TYPE {
+        string, integer, longType { }, assetReference;
+
+        // We cannot use "long" as enum (it is a reserved word), so we need to handle from- and to-String
+        public static SOURCE_TYPE getEnum(String value) {
+            return "long".equals(value) ? longType : valueOf(value);
+        }
+        @Override
+        public String toString() {
+            return this == longType ? "long" : super.toString();
+        }
+    }
 
     public final String source;
     public final SOURCE_TYPE sourceType; // Default is string
@@ -61,7 +72,7 @@ public abstract class Converter {
      */
     public Converter(YAML config) {
         this(config.getString(CONF_SOURCE),
-             config.containsKey(CONF_SOURCE_TYPE) ? SOURCE_TYPE.valueOf(config.getString(CONF_SOURCE_TYPE)) : null,
+             config.containsKey(CONF_SOURCE_TYPE) ? SOURCE_TYPE.getEnum(config.getString(CONF_SOURCE_TYPE)) : null,
              config.getString(CONF_DEST), config.getString(CONF_FALLBACK_DEST),
              config.getString(CONF_DEST_TYPE, DEFAULT_DEST_TYPE),
              config.getBoolean(CONF_REQUIRED, DEFAULT_REQUIRED),
@@ -159,6 +170,11 @@ public abstract class Converter {
                 value = intValue == null ? null : intValue.toString();
                 break;
             }
+            case longType: {
+                Long longValue = record.getFieldLongValue(source);
+                value = longValue == null ? null : longValue.toString();
+                break;
+            }
             case assetReference: {
                 AssetReference assetReference = record.getAssetReference(source);
                 if (assetReference == null) {
@@ -194,6 +210,10 @@ public abstract class Converter {
             }
             case integer: {
                 value = record.getFieldIntValue(source);
+                break;
+            }
+            case longType: {
+                value = record.getFieldLongValue(source);
                 break;
             }
             case assetReference: {
