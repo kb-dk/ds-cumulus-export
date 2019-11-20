@@ -58,8 +58,8 @@ public class CumulusStats {
             StreamSupport.stream(records.spliterator(), false).
                 limit(limited ? maxRecords : Long.MAX_VALUE).
                 forEach(this::collect);
+            printStats();
         }
-
     }
 
     private final XMLInputFactory xmlInputFactory = XMLInputFactory.newFactory();
@@ -86,7 +86,6 @@ public class CumulusStats {
             log.warn("Exception while processing Cumulus record");
             problematicRecords++;
         }
-        printStats();
     }
 
     private void collectField(XMLStreamReader reader) throws XMLStreamException {
