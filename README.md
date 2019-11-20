@@ -12,6 +12,9 @@ The exporter requires a YAML stating Cumulus server, userid, password etc.
 Copy `src/test/resources/ds-cumulus-export.yml` to `user.home` and fill in the missing values.
 Contact a KB-developer on the DigiSam-project for the credentials.
 
+Also copy `src/test/resources/ds-cumulus-export-default-mapping.yml` to `user.home`.
+This file does not need to be adjusted.
+
 (the location of the config file will be made flexible at a later point)
 
 ## Build & run
@@ -45,6 +48,16 @@ When this is done, we can run
 mvn package
 java -cp /usr/local/Cumulus_Java_SDK/CumulusJC.jar:target/cumulus-export-0.1-SNAPSHOT-jar-with-dependencies.jar dk.kb.ds.cumulus.export.CumulusExport
 ```
+
+## Developer note
+
+The parent-pom for this project offers [forbiddenapis](https://github.com/policeman-tools/forbidden-apis),
+which checks for Java methods that are unsafe to use. One very common mistake is to use a
+Locale-dependent API without specifying a Locale, e.g. writing `String.format("%.1f", 0.999)`
+instead of `String.format(Locale.ENGLISH, "%.1f", 1.234);`: The output from the non-Locale
+version will depend on the platform it is running on.
+
+To check for forbidden APIs, run `mvn clean package forbiddenapis:check`.
 
 ## Status
 Skeleton structure & code only.
