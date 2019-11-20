@@ -36,10 +36,14 @@ public class CumulusStats {
     private static final Logger log = LoggerFactory.getLogger(CumulusStats.class);
 
     public static final int MAX_OUTPUT_VALUES = 20;
+    public static final int LOG_EVERY = 10;
 
     private final Map<String, FieldStat> fieldStats = new HashMap<>();
+    private final int totalRecords;
+    private final int analyzeRecords;
     private int recordCounter = 0;
     private int problematicRecords = 0;
+    private long startNS;
 
     public static void main(String[] args) throws Exception {
         new CumulusStats();
@@ -55,11 +59,17 @@ public class CumulusStats {
             CumulusQuery query = CumulusQuery.getQueryForAllInCatalog(myCatalog);
             log.info("Requesting catalog '{}' with query '{}' from server for statistics", myCatalog, query);
             CumulusRecordCollection records = server.getItems(myCatalog, query);
+            totalRecords = records.getCount();
+            analyzeRecords = limited ? Math.min(maxRecords, totalRecords) : totalRecords;
+            log.info("Got {} records out of which {} will be analyzed. Extracting statistics... ",
+                     totalRecords, analyzeRecords);
+            startNS = System.nanoTime();
             StreamSupport.stream(records.spliterator(), false).
                 limit(limited ? maxRecords : Long.MAX_VALUE).
                 forEach(this::collect);
             printStats();
         }
+        log.info("Finished extracting statistics. Result available on stdout");
     }
 
     private final XMLInputFactory xmlInputFactory = XMLInputFactory.newFactory();
@@ -69,6 +79,7 @@ public class CumulusStats {
     }
     private void collect(CumulusRecord record) {
         recordCounter++;
+
         // We really need to bend backwards here to get all the fields.
         // A simple "record.getAllFieldNames()" would help tremendously!
         try (ByteArrayOutputStream recordContent = new ByteArrayOutputStream()) {
@@ -85,6 +96,13 @@ public class CumulusStats {
         } catch (Exception e) {
             log.warn("Exception while processing Cumulus record");
             problematicRecords++;
+        }
+        if (recordCounter % LOG_EVERY == 0) {
+            double spendMin = (System.nanoTime()-startNS)/1_000_000_000.0/60;
+            String recordsPerMin = String.format("%.1f", recordCounter/spendMin);
+            String eta = String.format("%.1f", (analyzeRecords-recordCounter)/(recordCounter/spendMin));
+            log.info("Analyzed record {}/{}, average processing time = {} record/min. ETA: {} minutes",
+                     recordCounter, analyzeRecords, recordsPerMin, eta);
         }
     }
 
@@ -117,7 +135,7 @@ public class CumulusStats {
     }
 
     private void printStats() {
-        System.out.println("Processed " + recordCounter + " out of which " + problematicRecords +
+        System.out.println("Processed " + recordCounter + " records out of which " + problematicRecords +
                            " were skipped due to technical problems. Found " + fieldStats.size() + " unique fields:");
         fieldStats.forEach((fn, fs) -> System.out.println(fs.toString()));
     }
