@@ -1,14 +1,3 @@
-package dk.kb.ds.cumulus.export.converters;
-
-import dk.kb.ds.cumulus.export.CumulusRecordMock;
-import dk.kb.ds.cumulus.export.DSAsserts;
-import dk.kb.ds.cumulus.export.FieldMapper;
-import dk.kb.ds.cumulus.export.YAML;
-import org.junit.jupiter.api.Test;
-
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 /*
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -23,6 +12,17 @@ import java.util.Map;
  *  limitations under the License.
  *
  */
+package dk.kb.ds.cumulus.export.converters;
+
+import dk.kb.ds.cumulus.export.CumulusRecordMock;
+import dk.kb.ds.cumulus.export.DSAsserts;
+import dk.kb.ds.cumulus.export.FieldMapper;
+import dk.kb.ds.cumulus.export.YAML;
+import org.junit.jupiter.api.Test;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 class StringConverterTest {
 
     @Test
@@ -30,10 +30,11 @@ class StringConverterTest {
         Map<String, Object> conf = new LinkedHashMap<>();
         conf.put(Converter.CONF_SOURCE, "mySource");
         conf.put(Converter.CONF_DEST, "myDest");
-        conf.put(Converter.CONF_DEST_TYPE, "string");
         conf.put(Converter.CONF_LINE_BREAK_IS_MULTI, false);
+        conf.put(Converter.CONF_DEST_TYPE, "string");
+
         {
-            StringConverter single = new StringConverter(new YAML(conf));
+            Converter single = ConverterFactory.buildConverter(new YAML(conf));
             CumulusRecordMock record = new CumulusRecordMock("mySource", "foo\nbar");
             FieldMapper.FieldValues singleFV = new FieldMapper.FieldValues();
             single.convert(record, singleFV);
@@ -44,7 +45,7 @@ class StringConverterTest {
         }
         {
             conf.put(Converter.CONF_LINE_BREAK_IS_MULTI, true);
-            StringConverter multi = new StringConverter(new YAML(conf));
+            Converter multi = ConverterFactory.buildConverter(new YAML(conf));
             CumulusRecordMock record = new CumulusRecordMock("mySource", "foo\nbar");
             FieldMapper.FieldValues multiFV = new FieldMapper.FieldValues();
             multi.convert(record, multiFV);

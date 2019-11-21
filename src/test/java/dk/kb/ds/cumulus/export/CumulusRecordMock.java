@@ -97,12 +97,12 @@ public class CumulusRecordMock extends CumulusRecord {
 
     @Override
     public Long getFieldLongValue(String fieldname) {
-        return Long.valueOf(content.get(fieldname));
+        return content.containsKey(fieldname) ? Long.valueOf(content.get(fieldname)) : null;
     }
 
     @Override
     public Integer getFieldIntValue(String fieldname) {
-        return Integer.valueOf(content.get(fieldname));
+        return content.containsKey(fieldname) ? Integer.valueOf(content.get(fieldname)) : null;
     }
 
     @Override

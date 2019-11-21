@@ -127,6 +127,12 @@ public class FieldMapper implements Function<CumulusRecord, FieldMapper.FieldVal
         public final String value;
 
         public FieldValue(String field, String value) {
+            if (field == null) {
+                throw new IllegalArgumentException("field was null (with value '" + value + "'), which is not allowed");
+            }
+            if (value == null) {
+                throw new IllegalArgumentException("value was null (with field '" + field + "'), which is not allowed");
+            }
             this.field = field;
             this.value = value;
         }
