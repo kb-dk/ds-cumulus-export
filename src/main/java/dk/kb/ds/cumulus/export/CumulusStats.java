@@ -37,6 +37,7 @@ public class CumulusStats {
 
     public static final int MAX_OUTPUT_VALUES = 20;
     public static final int LOG_EVERY = 10;
+    public static final int PRINT_EVERY = 1000;
 
     private final Map<String, FieldStat> fieldStats = new HashMap<>();
     private final int totalRecords;
@@ -70,6 +71,7 @@ public class CumulusStats {
             printStats();
         }
         log.info("Finished extracting statistics. Result available on stdout");
+        System.out.println("-------------------------------- Final stats @ record " + recordCounter);
     }
 
     private final XMLInputFactory xmlInputFactory = XMLInputFactory.newFactory();
@@ -103,6 +105,10 @@ public class CumulusStats {
             String eta = String.format("%.1f", (analyzeRecords-recordCounter)/(recordCounter/spendMin));
             log.info("Analyzed record {}/{}, average processing time = {} record/min. ETA: {} minutes",
                      recordCounter, analyzeRecords, recordsPerMin, eta);
+        }
+        if (recordCounter % PRINT_EVERY == 0) {
+            System.out.println("-------------------------------- Intermittent stats @ record " + recordCounter);
+            printStats();
         }
     }
 
