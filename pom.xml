@@ -162,14 +162,14 @@
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <version>3.1.1</version>
-                <configuration>
-                    <tarLongFileMode>posix</tarLongFileMode>
-                    <descriptors>
-                        <descriptor>src/main/assembly/assembly.xml</descriptor>
-                    </descriptors>
-                </configuration>
                 <executions>
                     <execution>
+                        <configuration>
+                            <tarLongFileMode>posix</tarLongFileMode>
+                            <descriptors>
+                                <descriptor>src/main/assembly/assembly.xml</descriptor>
+                            </descriptors>
+                        </configuration>
                         <id>make-assembly</id>
                         <!-- this is used for inheritance merges -->
                         <phase>package</phase>
@@ -178,25 +178,19 @@
                             <goal>single</goal>
                         </goals>
                     </execution>
-                </executions>
-            </plugin>
-            <!-- Create "fat JAR" with all dependencies except CumulusJC.jar, which we are not allowed to distribute -->
-            <plugin>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>3.1.1</version>
-                <configuration>
-                    <tarLongFileMode>posix</tarLongFileMode>
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
-                    <archive>
-                        <manifest>
-                            <mainClass>dk.kb.ds.cumulus.export.CumulusExport</mainClass>
-                        </manifest>
-                    </archive>
-                </configuration>
-                <executions>
                     <execution>
+                        <configuration>
+                            <tarLongFileMode>posix</tarLongFileMode>
+                            <descriptorRefs>
+                                <descriptorRef>jar-with-dependencies</descriptorRef>
+                            </descriptorRefs>
+                            <archive>
+                                <manifest>
+                                    <mainClass>dk.kb.ds.cumulus.export.CumulusExport</mainClass>
+                                </manifest>
+                            </archive>
+                        </configuration>
+                        <id>fat-jar</id>
                         <phase>package</phase>
                         <goals>
                             <goal>single</goal>
