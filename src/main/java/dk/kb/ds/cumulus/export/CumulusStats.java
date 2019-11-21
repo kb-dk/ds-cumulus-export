@@ -68,10 +68,10 @@ public class CumulusStats {
             StreamSupport.stream(records.spliterator(), false).
                 limit(limited ? maxRecords : Long.MAX_VALUE).
                 forEach(this::collect);
+            System.out.println("-------------------------------- Final stats @ record " + recordCounter);
             printStats();
         }
         log.info("Finished extracting statistics. Result available on stdout");
-        System.out.println("-------------------------------- Final stats @ record " + recordCounter);
     }
 
     private final XMLInputFactory xmlInputFactory = XMLInputFactory.newFactory();
