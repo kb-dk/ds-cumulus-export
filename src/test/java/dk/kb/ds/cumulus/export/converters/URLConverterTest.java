@@ -27,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 class URLConverterTest {
     /**
-     * This test relies on the current (2019-11-18) behaviour of https://kb.dk/ which does not return HTTP 200,
+     * This test relies on the current (2019-11-19) behaviour of https://kb.dk/ which does not return HTTP 200,
      * while http://www.kb.dk/ does return HTTP 200. This is unreliable and should be mocked instead.
      */
     @Test
@@ -38,7 +38,7 @@ class URLConverterTest {
         conf.put(Converter.CONF_DEST_TYPE, "url");
 
         {
-            Converter converter = new URLConverter(new YAML(conf));
+            Converter converter = ConverterFactory.buildConverter(new YAML(conf));
             CumulusRecordMock record = new CumulusRecordMock("mySource", "https://kb.dk/");
             FieldMapper.FieldValues fieldValues = new FieldMapper.FieldValues();
             converter.convert(record, fieldValues);
@@ -47,10 +47,10 @@ class URLConverterTest {
         }
 
         conf.put(URLConverter.CONF_VERIFY_PATTERN, "^https?://(?:www[.])?(.+)");
-        conf.put(URLConverter.CONF_VERIFY_REPLACEMENT, "http://www.$1");
+        conf.put(URLConverter.CONF_VERIFY_REPLACEMENT, "https://www.$1");
 
         {
-            Converter converter = new URLConverter(new YAML(conf));
+            Converter converter = ConverterFactory.buildConverter(new YAML(conf));
             CumulusRecordMock record = new CumulusRecordMock("mySource", "https://kb.dk/");
             FieldMapper.FieldValues fieldValues = new FieldMapper.FieldValues();
             converter.convert(record, fieldValues);

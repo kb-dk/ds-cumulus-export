@@ -33,7 +33,6 @@ public abstract class Converter {
     // YAML keys
     public static final String CONF_SOURCE =                 "source";
     public static final String CONF_SOURCE_TYPE =            "sourceType";
-    public static final String DEFAULT_SOURCE_TYPE =         "string";
 
     public static final String CONF_DEST =                   "dest";
     public static final String CONF_FALLBACK_DEST =          "fallbackDest";
@@ -46,7 +45,18 @@ public abstract class Converter {
     public static final boolean DEFAULT_LINE_BREAK_IS_MULTI = true;
 
 
-    public enum SOURCE_TYPE {string, assetReference}
+    public enum SOURCE_TYPE {
+        string, integer, longType { }, assetReference;
+
+        // We cannot use "long" as enum (it is a reserved word), so we need to handle from- and to-String
+        public static SOURCE_TYPE getEnum(String value) {
+            return "long".equals(value) ? longType : valueOf(value);
+        }
+        @Override
+        public String toString() {
+            return this == longType ? "long" : super.toString();
+        }
+    }
 
     public final String source;
     public final SOURCE_TYPE sourceType; // Default is string
@@ -61,8 +71,8 @@ public abstract class Converter {
      * @param config configuration for a Converter implementation.
      */
     public Converter(YAML config) {
-        this(config.getString(CONF_SOURCE, DEFAULT_SOURCE_TYPE),
-             config.containsKey(CONF_SOURCE_TYPE) ? SOURCE_TYPE.valueOf(config.getString(CONF_SOURCE_TYPE)) : null,
+        this(config.getString(CONF_SOURCE),
+             config.containsKey(CONF_SOURCE_TYPE) ? SOURCE_TYPE.getEnum(config.getString(CONF_SOURCE_TYPE)) : null,
              config.getString(CONF_DEST), config.getString(CONF_FALLBACK_DEST),
              config.getString(CONF_DEST_TYPE, DEFAULT_DEST_TYPE),
              config.getBoolean(CONF_REQUIRED, DEFAULT_REQUIRED),
@@ -83,14 +93,22 @@ public abstract class Converter {
      */
     public Converter(String source, SOURCE_TYPE sourceType,
                      String destination, String fallbackDestination, String destinationType,
-                     boolean required, boolean lineBreakIsMulti) {
+                     Boolean required, Boolean lineBreakIsMulti) {
         this.source = source;
-        this.sourceType = sourceType == null ? SOURCE_TYPE.string : sourceType;
+        this.sourceType = sourceType == null ? getDefaultSourceType() : sourceType;
         this.destination = destination;
         this.fallbackDestination = fallbackDestination;
         this.destinationType = destinationType == null ? DEFAULT_DEST_TYPE : destinationType;
-        this.required = required;
-        this.linebreakIsMulti = lineBreakIsMulti;
+        this.required = required == null ? DEFAULT_REQUIRED : required;
+        this.linebreakIsMulti = lineBreakIsMulti == null ? DEFAULT_LINE_BREAK_IS_MULTI : lineBreakIsMulti;
+    }
+
+    /**
+     * Override this in implementing classes if needed.
+     * @return the sourceType to use if none is given in the setup.
+     */
+    protected SOURCE_TYPE getDefaultSourceType() {
+        return SOURCE_TYPE.string;
     }
 
     /**
@@ -144,8 +162,17 @@ public abstract class Converter {
         String value = null;
         switch (sourceType) {
             case string: {
-                //value = record.getFieldValueOrNull(source);
                 value = record.getFieldValueForNonStringField(source);
+                break;
+            }
+            case integer: {
+                Integer intValue = record.getFieldIntValue(source);
+                value = intValue == null ? null : intValue.toString();
+                break;
+            }
+            case longType: {
+                Long longValue = record.getFieldLongValue(source);
+                value = longValue == null ? null : longValue.toString();
                 break;
             }
             case assetReference: {
@@ -167,11 +194,48 @@ public abstract class Converter {
     }
 
     /**
+     * Helper method for implementing classes.
+     * Extract the content of the {@link #source} field from the record as the stated {@link #CONF_SOURCE_TYPE}.
+     * @param record a Cumulus record.
+     * @return the content of {@link #source}.
+     * @throws IllegalStateException if the {@link #source} was required but not present in the record as the
+     * stated type.
+     */
+    protected Object getValue(CumulusRecord record) {
+        Object value;
+        switch (sourceType) {
+            case string: {
+                value = record.getFieldValue(source);
+                break;
+            }
+            case integer: {
+                value = record.getFieldIntValue(source);
+                break;
+            }
+            case longType: {
+                value = record.getFieldLongValue(source);
+                break;
+            }
+            case assetReference: {
+                value = record.getAssetReference(source);
+                break;
+            }
+            default: value = null;
+        }
+        if (required && value == null) {
+            throw new IllegalStateException(
+                "The required field '" + source + "' was not present in the record");
+        }
+        return value;
+    }
+
+    /**
      * Add the given values to the resultList if the values are not null.
+     * {@link Object#toString()} will be called on each value before adding to resultList.
      * @param values to add to the resultList.
      * @param resultList the values will be added as {@link #destination}-value pairs to this list.
      */
-    void addValues(List<String> values, List<FieldMapper.FieldValue> resultList) {
+    void addValues(List<Object> values, List<FieldMapper.FieldValue> resultList) {
         if (values == null) {
             return;
         }
@@ -179,21 +243,22 @@ public abstract class Converter {
     }
     /**
      * Add the given value to the resultList if the value is not null.
+     * {@link Object#toString()} will be called on the value before adding to resultList.
      * Note: If {@link #linebreakIsMulti} is trie, values with multiple lines will be split into lines and each line
      * will be added separately.
      * @param value a value to add to the resultList.
      * @param resultList the value will be added as a {@link #destination}-value pair to this list.
      */
-    void addValue(String value, List<FieldMapper.FieldValue> resultList) {
+    void addValue(Object value, List<FieldMapper.FieldValue> resultList) {
         if (value == null) {
             return;
         }
         if (linebreakIsMulti) {
-            for (String line : value.split("\\r?\\n")) {
+            for (String line : value.toString().split("\\r?\\n")) {
                 resultList.add(new FieldMapper.FieldValue(destination, line));
             }
         } else {
-            resultList.add(new FieldMapper.FieldValue(destination, value));
+            resultList.add(new FieldMapper.FieldValue(destination, value.toString()));
         }
     }
 
