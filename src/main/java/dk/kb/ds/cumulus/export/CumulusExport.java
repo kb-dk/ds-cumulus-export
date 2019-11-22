@@ -1,25 +1,17 @@
 package dk.kb.ds.cumulus.export;
 
 import dk.kb.cumulus.CumulusQuery;
-import dk.kb.cumulus.CumulusRecord;
 import dk.kb.cumulus.CumulusRecordCollection;
 import dk.kb.cumulus.CumulusServer;
-import dk.kb.cumulus.utils.ArgumentCheck;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
+import javax.xml.stream.XMLOutputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -31,6 +23,10 @@ public class CumulusExport {
     private static List<String> listOfType = Arrays.asList("image", "moving_image", "sound", "text", "other");
 
     private static final Logger log = LoggerFactory.getLogger(CumulusExport.class);
+    private static final XMLOutputFactory xmlOutput = XMLOutputFactory.newFactory();
+
+    static final String INDENTATION = "    ";
+    static final String NEWLINE = "\n";
 
     public static void main(String[] args) throws Exception {
 
@@ -47,15 +43,21 @@ public class CumulusExport {
             log.info("Requesting catalog '{}' with query '{}' from server", myCatalog, query);
             CumulusRecordCollection recordCollection = server.getItems(myCatalog, query);
 
-            File outputFile = new File(Configuration.getOutputFile());
-            OutputStream out = new FileOutputStream(outputFile);
-            ArgumentCheck.checkNotNull(out, "OutputStream out");
-            DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-            Document document = docBuilder.newDocument();
-
-            Element rootElement = document.createElement("add");
-            document.appendChild(rootElement);
+            // Create output file and stream for XML
+            File outputFile = null;
+            FileOutputStream fos = null;
+            try {
+                outputFile = new File(Configuration.getOutputFile());
+                fos = new FileOutputStream(outputFile);
+            } catch (FileNotFoundException e) {
+                log.warn("Output file not created ",e);
+            }
+            // Initializing XML
+            XMLStreamWriter xmlWriter = xmlOutput.createXMLStreamWriter(fos, "utf-8");
+            xmlWriter.writeStartDocument("UTF-8", "1.0");
+            xmlWriter.writeCharacters(NEWLINE);
+            xmlWriter.writeStartElement("add");
+            xmlWriter.writeCharacters(NEWLINE);
 
             // collection and type are mandatory fields in the Digisam Solr setup
             final FieldMapper fieldMapper = new FieldMapper();
@@ -66,16 +68,18 @@ public class CumulusExport {
                 limit(limited ? counter : Long.MAX_VALUE). // For testing purposes
                 map(fieldMapper).                          // Cumulus record -> FieldValues object
                 filter(Objects::nonNull).                  // Records that failed conversion are propagated as null
-                forEach(fv -> fv.toDoc(rootElement));      // Add to DOM
+                forEach(fv -> {
+                try {
+                    fv.toXML(xmlWriter);                   // Populating XML
+                } catch (XMLStreamException e) {
+                    log.warn("Something went wrong in XML processing: ",e);
+                }
 
-            // save the content to xml-file with specific formatting
-            TransformerFactory transformerFactory = TransformerFactory.newInstance();
-            Transformer transformer = transformerFactory.newTransformer();
-            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-            transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
-            DOMSource source = new DOMSource(document);
-            StreamResult result = new StreamResult(out);
-            transformer.transform(source, result);
+            });
+            // Ending XML
+            xmlWriter.writeEndElement(); // add
+            xmlWriter.writeCharacters(NEWLINE);
+            xmlWriter.flush();
             log.debug("Created " + outputFile + " as input for solr.");
         }
     }
