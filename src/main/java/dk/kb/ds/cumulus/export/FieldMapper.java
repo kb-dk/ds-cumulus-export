@@ -111,6 +111,7 @@ public class FieldMapper implements Function<CumulusRecord, FieldMapper.FieldVal
                 xml.writeCharacters(NEWLINE);
             } catch (XMLStreamException e) {
                 log.error("XML not filled properly",e);
+                throw new RuntimeException();
             }
         }
     }
