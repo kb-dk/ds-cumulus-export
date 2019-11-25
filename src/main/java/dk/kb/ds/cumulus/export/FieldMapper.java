@@ -100,22 +100,18 @@ public class FieldMapper implements Function<CumulusRecord, FieldMapper.FieldVal
          */
 
 
-        public void toXML(XMLStreamWriter xml) throws XMLStreamException {
-
-            xml.writeCharacters(INDENTATION);
-            xml.writeStartElement("doc");
-            xml.writeCharacters(NEWLINE);
-            forEach(fv -> {
-                try {
-                    fv.toXML(xml);
-                } catch (XMLStreamException e) {
-                    log.warn("Something went wrong in XML processing: ",e);
-                }
-            });
-            xml.writeCharacters(INDENTATION);
-            xml.writeEndElement(); // doc
-            xml.writeCharacters(NEWLINE);
-
+        public void toXML(XMLStreamWriter xml){
+            try {
+                xml.writeCharacters(INDENTATION);
+                xml.writeStartElement("doc");
+                xml.writeCharacters(NEWLINE);
+                forEach(fv -> fv.toXML(xml));
+                xml.writeCharacters(INDENTATION);
+                xml.writeEndElement(); // doc
+                xml.writeCharacters(NEWLINE);
+            } catch (XMLStreamException e) {
+                log.error("XML not filled properly",e);
+            }
         }
     }
 
@@ -141,14 +137,19 @@ public class FieldMapper implements Function<CumulusRecord, FieldMapper.FieldVal
          * Adds the contained field and value to the xml stream {@code <field name="field">value</field>}.
          * @param xml the xml stream where the field and value goes.
          */
-           public void toXML(XMLStreamWriter xml) throws XMLStreamException {
-                    xml.writeCharacters(INDENTATION);
-                    xml.writeCharacters(INDENTATION);
-                    xml.writeStartElement("field");
-                    xml.writeAttribute("name", field);
-                    xml.writeCharacters(value);
-                    xml.writeEndElement(); // field
-                    xml.writeCharacters(NEWLINE);
-            }
+           public void toXML(XMLStreamWriter xml) {
+
+               try {
+                   xml.writeCharacters(INDENTATION);
+                   xml.writeCharacters(INDENTATION);
+                   xml.writeStartElement("field");
+                   xml.writeAttribute("name", field);
+                   xml.writeCharacters(value);
+                   xml.writeEndElement(); // field
+                   xml.writeCharacters(NEWLINE);
+               } catch (XMLStreamException e) {
+                   log.error("XML not filled properly",e);
+               }
+           }
         }
 }
