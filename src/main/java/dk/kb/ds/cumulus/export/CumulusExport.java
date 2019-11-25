@@ -44,43 +44,32 @@ public class CumulusExport {
             CumulusRecordCollection recordCollection = server.getItems(myCatalog, query);
 
             // Create output file and stream for XML
-            File outputFile = null;
-            FileOutputStream fos = null;
-            try {
-                outputFile = new File(Configuration.getOutputFile());
-                fos = new FileOutputStream(outputFile);
-            } catch (FileNotFoundException e) {
-                log.warn("Output file not created ",e);
+            File outputFile = new File(Configuration.getOutputFile());
+            try (FileOutputStream fos = new FileOutputStream(outputFile)){
+                // Initializing XML
+                XMLStreamWriter xmlWriter = xmlOutput.createXMLStreamWriter(fos, "utf-8");
+                xmlWriter.writeStartDocument("UTF-8", "1.0");
+                xmlWriter.writeCharacters(NEWLINE);
+                xmlWriter.writeStartElement("add");
+                xmlWriter.writeCharacters(NEWLINE);
+
+                // collection and type are mandatory fields in the Digisam Solr setup
+                final FieldMapper fieldMapper = new FieldMapper();
+                fieldMapper.putStatic("collection", convertCollectionToSolrFormat(Configuration.getCollection()));
+                fieldMapper.putStatic("type", getConfigurationType());
+
+                StreamSupport.stream(recordCollection.spliterator(), false).
+                    limit(limited ? counter : Long.MAX_VALUE). // For testing purposes
+                    map(fieldMapper).                          // Cumulus record -> FieldValues object
+                    filter(Objects::nonNull).                  // Records that failed conversion are propagated as null
+                    forEach(fv -> fv.toXML(xmlWriter));        // Populating XML
+
+                // Ending XML
+                xmlWriter.writeEndDocument(); // add
+                xmlWriter.writeCharacters(NEWLINE);
+                xmlWriter.flush();
+                log.debug("Created " + outputFile + " as input for solr.");
             }
-            // Initializing XML
-            XMLStreamWriter xmlWriter = xmlOutput.createXMLStreamWriter(fos, "utf-8");
-            xmlWriter.writeStartDocument("UTF-8", "1.0");
-            xmlWriter.writeCharacters(NEWLINE);
-            xmlWriter.writeStartElement("add");
-            xmlWriter.writeCharacters(NEWLINE);
-
-            // collection and type are mandatory fields in the Digisam Solr setup
-            final FieldMapper fieldMapper = new FieldMapper();
-            fieldMapper.putStatic("collection", convertCollectionToSolrFormat(Configuration.getCollection()));
-            fieldMapper.putStatic("type", getConfigurationType());
-
-            StreamSupport.stream(recordCollection.spliterator(), false).
-                limit(limited ? counter : Long.MAX_VALUE). // For testing purposes
-                map(fieldMapper).                          // Cumulus record -> FieldValues object
-                filter(Objects::nonNull).                  // Records that failed conversion are propagated as null
-                forEach(fv -> {
-                try {
-                    fv.toXML(xmlWriter);                   // Populating XML
-                } catch (XMLStreamException e) {
-                    log.warn("Something went wrong in XML processing: ",e);
-                }
-
-            });
-            // Ending XML
-            xmlWriter.writeEndElement(); // add
-            xmlWriter.writeCharacters(NEWLINE);
-            xmlWriter.flush();
-            log.debug("Created " + outputFile + " as input for solr.");
         }
     }
 
