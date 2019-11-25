@@ -4,6 +4,8 @@ digisam:
   outputfile: $ Name of outputfile for solr
   collection: $ Name of the Cumulus collection
   type: image
+  counter: 20
+  limited: true
   cumulus:
     server: $ URL for the Cumulus server
     username: $ Cumulus user name

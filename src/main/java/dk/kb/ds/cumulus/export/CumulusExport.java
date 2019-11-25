@@ -31,11 +31,11 @@ public class CumulusExport {
     public static void main(String[] args) throws Exception {
 
         try (CumulusServer server = new CumulusServer(Configuration.getCumulusConf())) {
-            Properties exportpro = new Properties();
-
-            exportpro.load(CumulusExport.class.getClassLoader().getResourceAsStream("cumulusExport.properties"));
-            boolean limited = Boolean.parseBoolean(exportpro.getProperty("limited"));
-            int counter = Integer.parseInt(exportpro.getProperty("counter"));
+//            Properties exportpro = new Properties();
+//
+//            exportpro.load(CumulusExport.class.getClassLoader().getResourceAsStream("cumulusExport.properties"));
+            boolean limited = Boolean.parseBoolean(Configuration.getLimited());
+            int counter = Integer.parseInt(Configuration.getCounter());
 
             //Select the first Cumulus catalog from the configuration
             String myCatalog = Configuration.getCumulusConf().getCatalogs().get(0);
