@@ -31,9 +31,6 @@ public class CumulusExport {
     public static void main(String[] args) throws Exception {
 
         try (CumulusServer server = new CumulusServer(Configuration.getCumulusConf())) {
-//            Properties exportpro = new Properties();
-//
-//            exportpro.load(CumulusExport.class.getClassLoader().getResourceAsStream("cumulusExport.properties"));
             boolean limited = Boolean.parseBoolean(Configuration.getLimited());
             int counter = Integer.parseInt(Configuration.getCounter());
 
