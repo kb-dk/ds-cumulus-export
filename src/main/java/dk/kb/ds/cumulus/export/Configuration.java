@@ -122,15 +122,12 @@ public class Configuration {
     public static String getOutputFile(){
         return instance().outputFile;
     }
-
     public static String getType(){
         return instance().type;
     }
-
     public static String getLimited(){
         return instance().limited;
     }
-
     public static String getCounter(){
         return instance().counter;
     }
