@@ -19,14 +19,18 @@ import dk.kb.ds.cumulus.export.converters.Converter;
 import dk.kb.ds.cumulus.export.converters.ConverterFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
-import java.util.stream.Collector;
-import java.util.stream.Stream;
+
+import static dk.kb.ds.cumulus.export.CumulusExport.INDENTATION;
+import static dk.kb.ds.cumulus.export.CumulusExport.NEWLINE;
 
 /**
  * Extracts selected fields from {@link CumulusRecord}s and provides a list of {@link FieldValue}s with the
@@ -90,32 +94,25 @@ public class FieldMapper implements Function<CumulusRecord, FieldMapper.FieldVal
      */
     public static class FieldValues extends ArrayList<FieldValue> {
         /**
-         * Created a {@code <doc>} under the given rootElement and fills it with the {@link FieldValue}s
+         * Created a {@code <stream>} and fills it with the {@link FieldValue}s
          * {@code <field name="field">value</field>}.
-         * @param rootElement the generated doc-element will be added here.
+         * @param xml the XML stream.
          */
-        public void toDoc(Element rootElement) {
-            final Document base = rootElement.getOwnerDocument();
 
-            Element docElement = base.createElement("doc");
-            rootElement.appendChild(docElement);
 
-            forEach(fv -> fv.toDoc(docElement));
-        }
-
-        public String toString() {
-            StringBuffer sb = new StringBuffer();
-            stream().limit(20).forEach(fv -> {
-                if (sb.length() != 0) {
-                    sb.append(", ");
-                }
-                sb.append(fv.field).append(":").
-                    append(fv.value.length() > 50 ? fv.value.substring(0, 50) + "..." : fv.value);
-            });
-            if (size() > 20) {
-                sb.append(", ...(").append(size() - 20).append(" field-values more)");
+        public void toXML(XMLStreamWriter xml){
+            try {
+                xml.writeCharacters(INDENTATION);
+                xml.writeStartElement("doc");
+                xml.writeCharacters(NEWLINE);
+                forEach(fv -> fv.toXML(xml));
+                xml.writeCharacters(INDENTATION);
+                xml.writeEndElement(); // doc
+                xml.writeCharacters(NEWLINE);
+            } catch (XMLStreamException e) {
+                log.error("Error during XML building", e);
+                throw new RuntimeException(e);
             }
-            return "FieldValues(" + sb.toString() + ")";
         }
     }
 
@@ -138,22 +135,23 @@ public class FieldMapper implements Function<CumulusRecord, FieldMapper.FieldVal
         }
 
         /**
-         * Adds the contained field and value to the given solrDoc as {@code <field name="field">value</field>}.
-         * @param solrDoc where to add the field and value.
+         * Adds the contained field and value to the xml stream {@code <field name="field">value</field>}.
+         * @param xml the xml stream where the field and value goes.
          */
-        public void toDoc(Element solrDoc) {
-            final Document base = solrDoc.getOwnerDocument();
+           public void toXML(XMLStreamWriter xml) {
 
-            Element fieldElement = base.createElement("field");
-            solrDoc.appendChild(fieldElement);
-            fieldElement.setAttribute("name", field);
-            fieldElement.appendChild(base.createTextNode(value));
+               try {
+                   xml.writeCharacters(INDENTATION);
+                   xml.writeCharacters(INDENTATION);
+                   xml.writeStartElement("field");
+                   xml.writeAttribute("name", field);
+                   xml.writeCharacters(value);
+                   xml.writeEndElement(); // field
+                   xml.writeCharacters(NEWLINE);
+               } catch (XMLStreamException e) {
+                   log.error("Error during XML building, Field: {}, Value: {}, Exception: {}",field,value,e);
+                   throw new RuntimeException(e);
+               }
+           }
         }
-
-        @Override
-        public String toString() {
-            return "FieldValue(" + "field='" + field + "', value='" + value + "')";
-        }
-    }
-
 }
