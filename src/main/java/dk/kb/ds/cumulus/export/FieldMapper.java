@@ -110,8 +110,8 @@ public class FieldMapper implements Function<CumulusRecord, FieldMapper.FieldVal
                 xml.writeEndElement(); // doc
                 xml.writeCharacters(NEWLINE);
             } catch (XMLStreamException e) {
-                log.error("XML not filled properly",e);
-                throw new RuntimeException();
+                log.error("Error during XML building", e);
+                throw new RuntimeException(e);
             }
         }
     }
@@ -149,7 +149,8 @@ public class FieldMapper implements Function<CumulusRecord, FieldMapper.FieldVal
                    xml.writeEndElement(); // field
                    xml.writeCharacters(NEWLINE);
                } catch (XMLStreamException e) {
-                   log.error("XML not filled properly",e);
+                   log.error("Error during XML building, Field: {}, Value: {}, Exception: {}",field,value,e);
+                   throw new RuntimeException(e);
                }
            }
         }
