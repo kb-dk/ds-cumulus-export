@@ -4,8 +4,8 @@ digisam:
   outputfile: $ Name of outputfile for solr
   collection: $ Name of the Cumulus collection
   type: image
-  counter: 20
-  limited: true
+  limited: $ Limit the amount of Cumulus records to read if set to true
+  counter: $ Amount of records to read in cumulus
   cumulus:
     server: $ URL for the Cumulus server
     username: $ Cumulus user name
