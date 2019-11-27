@@ -49,6 +49,12 @@ mvn package
 java -cp /usr/local/Cumulus_Java_SDK/CumulusJC.jar:target/cumulus-export-0.1-SNAPSHOT-jar-with-dependencies.jar dk.kb.ds.cumulus.export.CumulusExport
 ```
 
+To extract statistics for the Cumulus fields, run
+```
+java -cp /usr/local/Cumulus_Java_SDK/CumulusJC.jar:target/cumulus-export-0.1-SNAPSHOT-jar-with-dependencies.jar dk.kb.ds.cumulus.export.CumulusStats
+```
+It will produce the file `stats.log`. Note that it will update the file for every 1000 records, so when the full run has finished, only the latest statistics-dump (the one at the end of the file) should be used.
+
 ## Developer note
 
 The parent-pom for this project offers [forbiddenapis](https://github.com/policeman-tools/forbidden-apis),
