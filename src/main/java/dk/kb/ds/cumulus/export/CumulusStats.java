@@ -51,10 +51,8 @@ public class CumulusStats {
     }
     private CumulusStats() throws Exception {
         try (CumulusServer server = new CumulusServer(Configuration.getCumulusConf())) {
-            Properties exportpro = new Properties();
-            exportpro.load(CumulusExport.class.getClassLoader().getResourceAsStream("cumulusExport.properties"));
-            boolean limited = Boolean.parseBoolean(exportpro.getProperty("limited"));
-            int maxRecords = Integer.parseInt(exportpro.getProperty("counter"));
+            boolean limited = Boolean.parseBoolean(Configuration.getLimited());
+            int maxRecords = Integer.parseInt(Configuration.getCounter());
 
             String myCatalog = Configuration.getCumulusConf().getCatalogs().get(0);
             CumulusQuery query = CumulusQuery.getQueryForAllInCatalog(myCatalog);
