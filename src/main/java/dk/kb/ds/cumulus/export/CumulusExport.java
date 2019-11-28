@@ -28,8 +28,7 @@ public class CumulusExport {
     public static void main(String[] args) throws Exception {
 
         try (CumulusServer server = new CumulusServer(Configuration.getCumulusConf())) {
-            boolean limited = Boolean.parseBoolean(Configuration.getLimited());
-            int counter = Integer.parseInt(Configuration.getCounter());
+            Integer maxRecords = Configuration.getMaxRecords();
 
             //Select the first Cumulus catalog from the configuration
             String myCatalog = Configuration.getCumulusConf().getCatalogs().get(0);
@@ -53,7 +52,7 @@ public class CumulusExport {
                 fieldMapper.putStatic("type", getConfigurationType());
 
                 StreamSupport.stream(recordCollection.spliterator(), false).
-                    limit(limited ? counter : Long.MAX_VALUE). // For testing purposes
+                    limit(maxRecords == -1 ? Long.MAX_VALUE : maxRecords). // For testing purposes
                     map(fieldMapper).                          // Cumulus record -> FieldValues object
                     filter(Objects::nonNull).                  // Records that failed conversion are propagated as null
                     forEach(fv -> fv.toXML(xmlWriter));        // Populating XML

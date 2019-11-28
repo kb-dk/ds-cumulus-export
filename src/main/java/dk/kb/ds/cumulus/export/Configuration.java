@@ -62,8 +62,8 @@ public class Configuration {
     /** The type of object to get info from */
     public static final String CONF_TYPE = "type";
     /** For testing purposes */
-    public static final String LIMITED = "limited";
-    public static final String COUNTER = "counter";
+    public static final String MAXRECORDS = "maxrecords";
+
     /**
      * The name of the conversion setup used by {@link dk.kb.ds.cumulus.export.converters.ConverterFactory}.
      * If this is not defined, the fallback is {@code ds-cumulus-export-default-mapping.yml}.
@@ -82,9 +82,8 @@ public class Configuration {
 
     private static Configuration instance = null;
     private YAML confMap;
+    private String maxRecords;
 
-    private String limited;
-    private String counter;
     /** The configuration for Cumulus.*/
     protected final CumulusConfiguration cumulusConf;
     private final String outputFile;
@@ -102,8 +101,7 @@ public class Configuration {
         this.collection = getString(confMap, CONF_CUMULUS_COLLECTION);
         this.outputFile = getString(confMap, CONF_OUTPUT_FILE);
         this.type = getString(confMap, CONF_TYPE);
-        this.limited = getString(confMap, LIMITED);
-        this.counter = getString(confMap, COUNTER);
+        this.maxRecords = getString(confMap, MAXRECORDS);
     }
 
     private String getString(YAML map, String confElement) {
@@ -125,11 +123,14 @@ public class Configuration {
     public static String getType(){
         return instance().type;
     }
-    public static String getLimited(){
-        return instance().limited;
-    }
-    public static String getCounter(){
-        return instance().counter;
+    public static Integer getMaxRecords() throws Exception {
+        try {
+            return Integer.parseInt(instance().maxRecords);
+        } catch (NumberFormatException e) {
+            String m = "Value of maxrecords must be an integer";
+            log.warn(m, e);
+            throw new Exception(m, e);
+        }
     }
     /**
      * @return the underlying map holding the configuration.
