@@ -51,20 +51,19 @@ public class CumulusStats {
     }
     private CumulusStats() throws Exception {
         try (CumulusServer server = new CumulusServer(Configuration.getCumulusConf())) {
-            boolean limited = Boolean.parseBoolean(Configuration.getLimited());
-            int maxRecords = Integer.parseInt(Configuration.getCounter());
+            int maxRecords = Configuration.getMaxRecords();
 
             String myCatalog = Configuration.getCumulusConf().getCatalogs().get(0);
             CumulusQuery query = CumulusQuery.getQueryForAllInCatalog(myCatalog);
             log.info("Requesting catalog '{}' with query '{}' from server for statistics", myCatalog, query);
             CumulusRecordCollection records = server.getItems(myCatalog, query);
             totalRecords = records.getCount();
-            analyzeRecords = limited ? Math.min(maxRecords, totalRecords) : totalRecords;
+            analyzeRecords = (-1 == maxRecords) ? totalRecords : Math.min(maxRecords, totalRecords);
             log.info("Got {} records out of which {} will be analyzed. Extracting statistics... ",
                      totalRecords, analyzeRecords);
             startNS = System.nanoTime();
             StreamSupport.stream(records.spliterator(), false).
-                limit(limited ? maxRecords : Long.MAX_VALUE).
+                limit(-1 == maxRecords ? Long.MAX_VALUE : maxRecords).
                 forEach(this::collect);
             System.out.println("-------------------------------- Final stats @ record " + recordCounter);
             printStats();
