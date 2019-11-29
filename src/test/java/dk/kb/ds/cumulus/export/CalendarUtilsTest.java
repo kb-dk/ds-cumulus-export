@@ -60,9 +60,4 @@ class CalendarUtilsTest {
                          "The input 'test[0]' should yield the expected datetime");
         }
     }
-
-    void getDateTime() {
-        assertEquals("1981-01-01T00:00:00.000+01:00", CalendarUtils.getDateTime("yyyy", "1981"));
-
-    }
 }

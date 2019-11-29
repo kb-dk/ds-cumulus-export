@@ -3,16 +3,10 @@ package dk.kb.ds.cumulus.export;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.xml.datatype.DatatypeFactory;
-import javax.xml.datatype.XMLGregorianCalendar;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -26,16 +20,14 @@ public class CalendarUtils {
     /** constructor to prevent instantiation of utility class. */
     protected CalendarUtils() {}
 
-    /** A single instance of the DatatypeFactory to prevent overlap from recreating it too often.*/
-    private static DatatypeFactory factory = null;
-
     private static final String DATE_RANGE_PATTERN = "[%s TO %s]";
     private static final String DASH = "-";
 
     /**
      * ISO8601 representation with second granularity and Zulu time. Compatible with Solr datetime.
      */
-    private static final DateTimeFormatter ISO8601_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
+    private static final DateTimeFormatter ISO8601_FORMATTER =  DateTimeFormatter.
+        ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US);
 
     /**
      * Parse the given datetime String leniently, by iterating multiple formats until a result is derived.
@@ -95,7 +87,8 @@ public class CalendarUtils {
         return datetime + PADDING.substring(datetime.length());
     }
 
-    private static final DateTimeFormatter WRITTEN_PARSER = DateTimeFormatter.ofPattern("ccc LLL dd HH:mm:ss zzz yyy");
+    private static final DateTimeFormatter WRITTEN_PARSER = DateTimeFormatter.
+        ofPattern("ccc LLL dd HH:mm:ss zzz yyyy", Locale.US);
     /**
      * Parses inputs with full date and time in written format.
      * @param datetime written time representation, e.g. 'Mon Jul 29 16:10:29 CEST 2019'.
@@ -171,68 +164,15 @@ public class CalendarUtils {
     private static String parseYearToYear(String datetime) {
         Matcher yyMatcher = YEAR_TO_YEAR.matcher(datetime);
         if (yyMatcher.matches()) {
-            return String.format(DATE_RANGE_PATTERN, yyMatcher.group(1), yyMatcher.group(2));
+            return String.format(Locale.US, DATE_RANGE_PATTERN, yyMatcher.group(1), yyMatcher.group(2));
         }
         yyMatcher = YEAR_RANGE_PATTERN.matcher(datetime);
         if (yyMatcher.matches()){
-            return String.format(DATE_RANGE_PATTERN,
+            return String.format(Locale.US, DATE_RANGE_PATTERN,
                                  yyMatcher.group(1), yyMatcher.group(1).substring(0,2) + yyMatcher.group(2));
         }
 
         log.trace("parseYearToYear({}) failed parsing", datetime);
         return null;
-    }
-
-    /**
-     * Turns a date into a XMLGregorianCalendar.
-     *
-     * @param date The date.
-     * @return The XMLGregorianCalendar.
-     */
-    public static XMLGregorianCalendar getXmlGregorianCalendar(Date date) {
-        try {
-            if(factory == null) {
-                factory = DatatypeFactory.newInstance();
-            }
-
-            GregorianCalendar gc = new GregorianCalendar();
-            gc.setTime(date);
-            return factory.newXMLGregorianCalendar(gc);
-        } catch (Exception e) {
-            IllegalStateException res = new IllegalStateException("Could not create XML date for the date '"
-                + date + "'.", e);
-            throw res;
-        }
-    }
-
-    /**
-     * @return The current date in the XML date format.
-     */
-    public static String getCurrentDate() {
-        return getXmlGregorianCalendar(new Date()).toString();
-    }
-
-    /**
-     * Retrieves a date in the XML format, which needs to be transformed from another given format.
-     * @param format The format of the given date.
-     * @param dateString The given date to transform.
-     * @return The given date in the XML date format.
-     */
-    public static String getDateTime(String format, String dateString) {
-        SimpleDateFormat formatter = new SimpleDateFormat(format);
-        try {
-            Date date = formatter.parse(dateString);
-            return getXmlGregorianCalendar(date).toString();
-        } catch (ParseException e) {
-            try {
-                SimpleDateFormat formatter2 = new SimpleDateFormat(format, Locale.US);
-                Date date2 = formatter2.parse(dateString);
-                return getXmlGregorianCalendar(date2).toString();
-            } catch (ParseException e2) {
-                IllegalStateException res = new IllegalStateException("Cannot parse date '" + dateString
-                    + "' in format '" + format + "'. " + "Caught exceptions: " + e + " , " + e2, e2);
-                throw res;
-            }
-        }
     }
 }
