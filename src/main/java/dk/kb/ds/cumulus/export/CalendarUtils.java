@@ -27,7 +27,7 @@ public class CalendarUtils {
      * ISO8601 representation with second granularity and Zulu time. Compatible with Solr datetime.
      */
     private static final DateTimeFormatter ISO8601_FORMATTER =  DateTimeFormatter.
-        ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US);
+        ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.ROOT);
 
     /**
      * Parse the given datetime String leniently, by iterating multiple formats until a result is derived.
@@ -88,7 +88,7 @@ public class CalendarUtils {
     }
 
     private static final DateTimeFormatter WRITTEN_PARSER = DateTimeFormatter.
-        ofPattern("ccc LLL dd HH:mm:ss zzz yyyy", Locale.US);
+        ofPattern("ccc LLL dd HH:mm:ss zzz yyyy", Locale.ROOT);
     /**
      * Parses inputs with full date and time in written format.
      * @param datetime written time representation, e.g. 'Mon Jul 29 16:10:29 CEST 2019'.
@@ -164,11 +164,11 @@ public class CalendarUtils {
     private static String parseYearToYear(String datetime) {
         Matcher yyMatcher = YEAR_TO_YEAR.matcher(datetime);
         if (yyMatcher.matches()) {
-            return String.format(Locale.US, DATE_RANGE_PATTERN, yyMatcher.group(1), yyMatcher.group(2));
+            return String.format(Locale.ROOT, DATE_RANGE_PATTERN, yyMatcher.group(1), yyMatcher.group(2));
         }
         yyMatcher = YEAR_RANGE_PATTERN.matcher(datetime);
         if (yyMatcher.matches()){
-            return String.format(Locale.US, DATE_RANGE_PATTERN,
+            return String.format(Locale.ROOT, DATE_RANGE_PATTERN,
                                  yyMatcher.group(1), yyMatcher.group(1).substring(0,2) + yyMatcher.group(2));
         }
 

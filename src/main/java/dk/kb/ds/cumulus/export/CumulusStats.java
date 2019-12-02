@@ -98,8 +98,8 @@ public class CumulusStats {
         }
         if (recordCounter % LOG_EVERY == 0) {
             double spendMin = (System.nanoTime()-startNS)/1_000_000_000.0/60;
-            String recordsPerMin = String.format("%.1f", recordCounter/spendMin);
-            String eta = String.format("%.1f", (analyzeRecords-recordCounter)/(recordCounter/spendMin));
+            String recordsPerMin = String.format(Locale.ROOT,"%.1f", recordCounter/spendMin);
+            String eta = String.format(Locale.ROOT,"%.1f", (analyzeRecords-recordCounter)/(recordCounter/spendMin));
             log.info("Analyzed record {}/{}, average processing time = {} record/min. ETA: {} minutes",
                      recordCounter, analyzeRecords, recordsPerMin, eta);
         }
