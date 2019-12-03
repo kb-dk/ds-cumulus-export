@@ -88,7 +88,7 @@ public class CalendarUtils {
     }
 
     private static final DateTimeFormatter WRITTEN_PARSER = DateTimeFormatter.
-        ofPattern("ccc LLL dd HH:mm:ss zzz yyyy", Locale.ROOT);
+        ofPattern("ccc LLL dd HH:mm:ss zzz yyyy", Locale.UK); // UK as we use ccc and LLL
     /**
      * Parses inputs with full date and time in written format.
      * @param datetime written time representation, e.g. 'Mon Jul 29 16:10:29 CEST 2019'.
