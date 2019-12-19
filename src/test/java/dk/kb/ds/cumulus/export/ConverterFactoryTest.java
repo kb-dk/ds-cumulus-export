@@ -28,7 +28,7 @@ class ConverterFactoryTest {
     @Test
     public void testDefaultFactory() throws IOException {
         List<Converter> converters =
-            ConverterFactory.build("src/main/conf/ds-cumulus-export-default-mapping.yml", null);
+            ConverterFactory.build("ds-cumulus-export-default-mapping.yml", null);
         assertTrue(converters.size() > 0, "There should be at least 1 converter, but there was 0");
     }
 
