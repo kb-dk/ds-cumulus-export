@@ -47,45 +47,6 @@
       <api.check.phase>process-classes</api.check.phase>
     </properties>
 
-    <developers>
-      <developer>
-        <name>Toke Eskildsen</name>
-        <email>toes@kb.dk</email>
-        <organization>kb</organization>
-        <organizationUrl>http://kb.dk</organizationUrl>
-        <roles>
-          <role>Developer</role>
-        </roles>
-      </developer>
-      <developer>
-        <name>Nader Khatibi</name>
-        <email>nkh@kb.dk</email>
-        <organization>kb</organization>
-        <organizationUrl>http://kb.dk</organizationUrl>
-        <roles>
-          <role>Developer</role>
-        </roles>
-      </developer>
-      <developer>
-        <name>Dan Haarslev Egebo</name>
-        <email>dahe@kb.dk</email>
-        <organization>kb</organization>
-        <organizationUrl>http://kb.dk</organizationUrl>
-        <roles>
-          <role>Developer</role>
-        </roles>
-      </developer>
-      <developer>
-        <name>Knud Åge Hansen</name>
-        <email>kaah@kb.dk</email>
-        <organization>kb</organization>
-        <organizationUrl>http://kb.dk</organizationUrl>
-        <roles>
-          <role>Developer</role>
-        </roles>
-      </developer>
-    </developers>
-
     <dependencies>
         <dependency>
             <groupId>org.sbforge</groupId>
