@@ -11,7 +11,7 @@
     <parent>
       <groupId>org.sbforge</groupId>
       <artifactId>sbforge-parent</artifactId>
-      <version>22-SNAPSHOT</version>
+      <version>22</version>
     </parent>
     <scm>
         <url>https://github.com/Det-Kongelige-Bibliotek/ds-cumulus-export</url>
