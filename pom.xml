@@ -36,7 +36,7 @@
       <build.time>${maven.build.timestamp}</build.time>
       <maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
       <java.main.class>dk.kb.ds.cumulus.export.CumulusExport</java.main.class>
-      <test.groups>fast</test.groups>
+      <test.excludedGroups>slow</test.excludedGroups>
       <!-- Specify java version here, to support forbiddenapis plugin -->
       <maven.compiler.source>11</maven.compiler.source>
       <maven.compiler.target>11</maven.compiler.target>
@@ -50,7 +50,7 @@
       <profile>
         <id>allTests</id>
         <properties>
-           <test.groups>fast,slow</test.groups>
+           <test.excludedGroups></test.excludedGroups>
         </properties>
       </profile>
     </profiles>
@@ -184,7 +184,7 @@
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
-          <groups>${test.groups}</groups>
+            <excludedGroups>${test.excludedGroups}</excludedGroups>
         </configuration>
       </plugin>
       <plugin>
