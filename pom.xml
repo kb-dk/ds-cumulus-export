@@ -18,11 +18,11 @@
         <connection>scm:git:ssh://git@github.com:Det-Kongelige-Bibliotek/ds-cumulus-export.git</connection>
         <developerConnection>scm:git:ssh://git@github.com:Det-Kongelige-Bibliotek/ds-cumulus-export.git</developerConnection>
     </scm>
-    <!-- TODO: Move the KB-cumulus-api to sbforge and change the location below -->
+
     <repositories>
       <repository>
-        <id>sbprojects-nexus</id>
-        <url>https://sbprojects.statsbiblioteket.dk/nexus/content/groups/public</url>
+        <id>sbforge-nexus</id>
+        <url>https://sbforge.org/nexus/content/groups/public</url>
         <releases>
           <enabled>true</enabled>
         </releases>
@@ -163,65 +163,41 @@
         </dependency>
     </dependencies>
 
-    <build>
-        <plugins>
-            <!--Create lib folder with dependencies except CumulusJC.jar, which we are not allowed to distribute -->
-            <plugin>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>3.1.1</version>
-                <configuration>
-                    <tarLongFileMode>posix</tarLongFileMode>
-                    <descriptors>
-                        <descriptor>src/main/assembly/assembly.xml</descriptor>
-                    </descriptors>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>make-assembly</id>
-                        <!-- this is used for inheritance merges -->
-                        <phase>package</phase>
-                        <!-- append to the packaging phase. -->
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <!-- Create "fat JAR" with all dependencies except CumulusJC.jar, which we are not allowed to distribute -->
-            <plugin>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>3.1.1</version>
-                <configuration>
-                    <tarLongFileMode>posix</tarLongFileMode>
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
-                    <archive>
-                        <manifest>
-                            <mainClass>dk.kb.ds.cumulus.export.CumulusExport</mainClass>
-                        </manifest>
-                    </archive>
-                </configuration>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>1.2.1</version>
-                <configuration>
-                    <mainClass>dk.kb.ds.cumulus.export.CumulusExport</mainClass>
-                    <arguments>
-                        <argument></argument>
-                    </arguments>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <configuration>
+          <descriptors>
+            <descriptor>src/main/assembly/assembly.xml</descriptor>
+          </descriptors>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <phase>package</phase>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <groups>${test.groups}</groups>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>1.2.1</version>
+        <configuration>
+          <mainClass>dk.kb.ds.cumulus.export.CumulusExport</mainClass>
+          <arguments>
+            <argument></argument>
+          </arguments>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>
