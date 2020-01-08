@@ -5,32 +5,60 @@ Automated export from Cumulus
 * Java 11
 * Maven 3
 
+## Premise
+
+The purpose of this application is to extract metadata for a given image collection from the Cumulus
+image application at the Royal Danish Library and produce XML, directly usable for indexing into
+Solr. See [ds-solr](https://github.com/Det-Kongelige-Bibliotek/ds-solr) for Solr setup.    
+
 ## Setup
 
-The exporter requires a YAML stating Cumulus server, userid, password etc.
+The exporter requires a YAML-config stating Cumulus server, userid, password etc.
 
-Copy `src/test/resources/ds-cumulus-export.yml` to `user.home` and fill in the missing values.
-Contact a KB-developer on the DigiSam-project for the credentials.
+Either take the pre-filled configuration from the Digisam Confluence at 
+ `Teknisk dokumentation/Confs/Backend/ds-cumulus-export.yml` or 
+ copy `src/main/conf/ds-cumulus-export.yml` to `user.home` and fill in the missing values.
+ In the latter case, you have to contact a KB-developer on the Digisam-project for the credentials.
 
-Also copy `src/test/resources/ds-cumulus-export-default-mapping.yml` to `user.home`.
-This file does not need to be adjusted.
+The exporter also requires a mapping file, which describes which Cumulus fields should
+be converted to which Solr fields: Vopy `src/main/conf/ds-cumulus-export-default-mapping.yml` 
+to `user.home`. This file does not need to be adjusted.
 
 (the location of the config file will be made flexible at a later point)
 
 This project requires [Cumulus JAVA SDK](https://sbprojects.statsbiblioteket.dk/display/AIM/Cumulus+Java+SDK).
 See the section "Installing cumulus API" at the bottom of this README.
  
-## Build & run
+## Build
 
 When the config files are copied and the Cumulus API is installed, 
-`ds-cumulus-export` can be build & run with
+`ds-cumulus-export` can be build with the standard
 ```
 mvn package
-tar -xf target/cumulus-export-0.1-SNAPSHOT-distribution.tar.gz -C target/
-target/cumulus-export-0.1-SNAPSHOT/bin/cumulus-export.sh
 ```
 
-To extract statistics for the Cumulus fields, run
+## Run
+
+The `mvn package` produces a tar intended for deployment. It must be unpacked:
+```
+tar -xf target/cumulus-export-0.1-SNAPSHOT-distribution.tar.gz -C target/
+```
+
+After that, an export can be activated with
+```
+target/cumulus-export-0.1-SNAPSHOT/bin/cumulus-export.sh
+```
+which will produce an XML-file. If using the configuration from Confluence, the
+file will be named `indexThisInSolr.xml` and be in the current folder. This file is intended for
+indexing into Solr. See the README for [ds-solr](https://github.com/Det-Kongelige-Bibliotek/ds-solr)
+for details. 
+
+The log-file is located in `user.home/logs/ds-cumulus-export.log`
+
+## Extract statistics
+
+The project has a tool for providing statistics of Cumulus records. Extract the tar, as
+described above, and run
 ```
 target/cumulus-export-0.1-SNAPSHOT/bin/cumulus-stats.sh > stats.log
 ```
@@ -38,13 +66,19 @@ It will produce the file `stats.log`. Note that it will update the file for ever
 so when the full run has finished, only the latest statistics-dump (the one at the end of the
 file) should be used.
 
-## Developer note
+## Developer notes
 
 The parent-pom for this project has [forbiddenapis](https://github.com/policeman-tools/forbidden-apis),
 enabled, which checks for Java methods that are unsafe to use. One very common mistake is to use a
 Locale-dependent API without specifying a Locale, e.g. writing `String.format("%.1f", 0.999)`
 instead of `String.format(Locale.ENGLISH, "%.1f", 1.234);`: The output from the non-Locale
 version will depend on the platform it is running on.
+
+It would be nice, as a developer, to be able to run the exporter with
+```
+mvn exec:java
+```
+but unfortunately it does not (yet) work due to the Cumulus API not being a standard Maven dependency.
 
 ## Installing Cumulus API
 
