@@ -39,7 +39,8 @@ mvn package
 
 ## Run
 
-The `mvn package` produces a tar intended for deployment. It must be unpacked:
+After build has been completed, there should be a tar-archive intended for deployment in the `target`-folder.
+ In order to runt the program, the archive must be unpacked:
 ```
 tar -xf target/cumulus-export-0.1-SNAPSHOT-distribution.tar.gz -C target/
 ```
@@ -57,12 +58,12 @@ The log-file is located in `user.home/logs/ds-cumulus-export.log`
 
 ## Extract statistics
 
-The project has a tool for providing statistics of Cumulus records. Extract the tar, as
-described above, and run
+For debugging of metadata and future changes to the mapping of fields, the project has a tool for
+ providing statistics of Cumulus records: Extract the tar, as described above, and run
 ```
 target/cumulus-export-0.1-SNAPSHOT/bin/cumulus-stats.sh > stats.log
 ```
-It will produce the file `stats.log`. Note that it will update the file for every 1000 records,
+This will produce the file `stats.log`. Note that it will update the file for every 1000 records,
 so when the full run has finished, only the latest statistics-dump (the one at the end of the
 file) should be used.
 
