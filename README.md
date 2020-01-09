@@ -21,7 +21,7 @@ Either take the pre-filled configuration from the Digisam Confluence at
  In the latter case, you have to contact a KB-developer on the Digisam-project for the credentials.
 
 The exporter also requires a mapping file, which describes which Cumulus fields should
-be converted to which Solr fields: Vopy `src/main/conf/ds-cumulus-export-default-mapping.yml` 
+be converted to which Solr fields: Copy `src/main/conf/ds-cumulus-export-default-mapping.yml` 
 to `user.home`. This file does not need to be adjusted.
 
 (the location of the config file will be made flexible at a later point)
