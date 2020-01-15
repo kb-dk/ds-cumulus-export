@@ -16,6 +16,7 @@ package dk.kb.ds.cumulus.export;
 
 import com.canto.cumulus.CumulusSession;
 import com.canto.cumulus.GUID;
+import com.canto.cumulus.ItemCollection;
 import com.canto.cumulus.fieldvalue.AssetReference;
 import dk.kb.cumulus.CumulusRecord;
 import dk.kb.cumulus.field.Field;
@@ -26,13 +27,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import sun.misc.Unsafe;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 import java.io.File;
 import java.io.OutputStream;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -130,6 +129,17 @@ public class CumulusRecordMock extends CumulusRecord {
         public String getDisplayString() {
             return displayString;
         }
+    }
+
+    @Override
+    public GUID getGUID(String fieldname){
+        return GUID.UID_REC_ASSET_REFERENCE;
+    }
+
+    @Override
+    public ItemCollection getTableValue(GUID guid){
+//      return fake ItemCollection ??
+        return null;
     }
 
     @Override

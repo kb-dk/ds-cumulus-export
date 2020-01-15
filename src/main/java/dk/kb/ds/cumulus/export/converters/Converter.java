@@ -46,7 +46,7 @@ public abstract class Converter {
 
 
     public enum SOURCE_TYPE {
-        string, integer, longType { }, assetReference;
+        string, integer, longType { }, assetReference, assetReferenceRendition;
 
         // We cannot use "long" as enum (it is a reserved word), so we need to handle from- and to-String
         public static SOURCE_TYPE getEnum(String value) {
