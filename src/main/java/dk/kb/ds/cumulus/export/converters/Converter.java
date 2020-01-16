@@ -21,7 +21,9 @@ import dk.kb.ds.cumulus.export.YAML;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 /**
@@ -33,6 +35,7 @@ public abstract class Converter {
     // YAML keys
     public static final String CONF_SOURCE =                 "source";
     public static final String CONF_SOURCE_TYPE =            "sourceType";
+    public static final String DEFAULT_SOURCE_TYPE =         "string";
 
     public static final String CONF_DEST =                   "dest";
     public static final String CONF_FALLBACK_DEST =          "fallbackDest";
@@ -50,7 +53,16 @@ public abstract class Converter {
 
         // We cannot use "long" as enum (it is a reserved word), so we need to handle from- and to-String
         public static SOURCE_TYPE getEnum(String value) {
-            return "long".equals(value) ? longType : valueOf(value);
+            if (value == null) {
+                return valueOf(DEFAULT_SOURCE_TYPE);
+            }
+            try {
+                return "long".equals(value) ? longType : valueOf(value);
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException(String.format(
+                    Locale.ENGLISH,"The source type '%s' is unknown. Valid source types are %s",
+                    value, Arrays.toString(SOURCE_TYPE.values())));
+            }
         }
         @Override
         public String toString() {
