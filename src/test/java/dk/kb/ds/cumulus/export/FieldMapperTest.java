@@ -35,8 +35,8 @@ class FieldMapperTest {
             "Emneord", "Old wars\nNew orders",
             "Ophav", "H.C. Andersen\nGrimm E. Ulv",
             "Copyright", "Custom License",
-            "Asset Reference", "Some reference"/*,
-            "Renditions Manager", "cumulus-core-01:/Depot/DAMJP2/Online_Master_Arkiv/non-archival/KOB/bs_kistebilleder-2/bs000030.jp2"*/
+            "Asset Reference", "Some reference",
+            "Renditions Manager", "cumulus-core-01:/Depot/DAMJP2/Online_Master_Arkiv/non-archival/KOB/bs_kistebilleder-2/bs000030.jp2"
         );
         FieldMapper mapper = new FieldMapper();
         FieldMapper.FieldValues fieldValues = mapper.apply(record);
@@ -49,10 +49,10 @@ class FieldMapperTest {
             "datetime", "2019-11-11",
             "created_date", "2019-10-04T08:05:10Z",
             "license", "Custom License",
-            "image", "Some reference"/*,
+            "image", "Some reference",
             "image_preview", "https://kb-images.kb.dk/DAMJP2/DAMJP2/Online_Master_Arkiv/non-archival/KOB/bs_kistebilleder-2/bs000030/full/!345,2555/0/native.jpg",
             "image_full", "https://kb-images.kb.dk/DAMJP2/online_master_arkiv/non-archival/KOB/bs_kistebilleder-2/bs000030/full/full/0/default.jpg",
-            "iiif", "https://kb-images.kb.dk/DAMJP2/online_master_arkiv/non-archival/KOB/bs_kistebilleder-2/bs000030/"*/
+            "iiif", "https://kb-images.kb.dk/DAMJP2/online_master_arkiv/non-archival/KOB/bs_kistebilleder-2/bs000030/"
         );
 
         DSAsserts.assertMultiFieldValues(

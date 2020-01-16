@@ -133,12 +133,12 @@ public class CumulusRecordMock extends CumulusRecord {
 
     @Override
     public GUID getGUID(String fieldname){
-        return GUID.UID_REC_ASSET_REFERENCE;
+        return null;//content.get(GUID.UID_REC_ASSET_REFERENCE); //??
     }
 
     @Override
     public ItemCollection getTableValue(GUID guid){
-//      return fake ItemCollection ??
+//      return fake ItemCollection??
         return null;
     }
 

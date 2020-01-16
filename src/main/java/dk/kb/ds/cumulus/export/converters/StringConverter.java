@@ -70,12 +70,12 @@ public class StringConverter extends Converter {
                 addValue(convertImpl(getAsString(record)), resultList);
                 break;
             }
-            case assetReference: {
-                AssetReference ar = record.getAssetReference(source);
-                addValue(convertImpl(ar.getDisplayString()), resultList);
-                break;
-            }
-            case assetReferenceRendition: {
+//            case assetReference: {
+//                AssetReference ar = record.getAssetReference(source);
+//                addValue(convertImpl(ar.getDisplayString()), resultList);
+//                break;
+//            }
+            case assetReference/*Rendition*/: {
                 GUID guid = record.getGUID(source);
                 if (guid != null){
                     AssetReference ar = getRenditionAssetReference(record, guid);
@@ -92,7 +92,8 @@ public class StringConverter extends Converter {
     private AssetReference getRenditionAssetReference(CumulusRecord record, GUID guid) {
         GUID rendition_name_guid = null;
         GUID rendition_state_guid = null;
-        final int FINISHED_STATE_ID = 3;
+        final int FINISHED_STATE_ID = 3; //Possible to retrieve it somewhere??
+        final String JP2_RENDITION_NAME = "JPEG2000";
         AssetReference ar = null;
 
         ItemCollection renditions = record.getTableValue(guid);
@@ -102,7 +103,7 @@ public class StringConverter extends Converter {
                 if ("State".equals(fd.getName())) rendition_state_guid = fd.getFieldUID();
             }
             String query = String.format(Locale.ROOT, "%s == \"%s\" && %s == \":ID:%d\"",
-                rendition_name_guid, "JPEG2000",
+                rendition_name_guid, JP2_RENDITION_NAME,
                 rendition_state_guid, FINISHED_STATE_ID);
             renditions.find(query, null, null, null);
             if (renditions.getItemCount() == 1) {
