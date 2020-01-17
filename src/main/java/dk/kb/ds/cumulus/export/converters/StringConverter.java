@@ -65,54 +65,7 @@ public class StringConverter extends Converter {
 
     @Override
     public void convertImpl(CumulusRecord record, List<FieldMapper.FieldValue> resultList) {
-        switch (sourceType) {
-            case string: {
-                addValue(convertImpl(getAsString(record)), resultList);
-                break;
-            }
-            case assetReference: {
-                AssetReference ar = record.getAssetReference(source);
-                addValue(convertImpl(ar.getDisplayString()), resultList);
-                break;
-            }
-            case assetReferenceRendition: {
-                GUID guid = record.getGUID(source);
-                if (guid != null){
-                    AssetReference ar = getRenditionAssetReference(record, guid);
-                    addValue(convertImpl(ar != null ? ar.getDisplayString() : null), resultList);
-                    break;
-                }
-                addValue(null, resultList);
-                break;
-            }
-            default: throw new UnsupportedOperationException("The source type '" + sourceType + "' is not supported");
-        }
-    }
-
-    private AssetReference getRenditionAssetReference(CumulusRecord record, GUID guid) {
-        GUID rendition_name_guid = null;
-        GUID rendition_state_guid = null;
-        final int FINISHED_STATE_ID = 3;
-        AssetReference ar = null;
-
-        ItemCollection renditions = record.getTableValue(guid);
-        if (renditions != null) {
-            for (com.canto.cumulus.FieldDefinition fd : renditions.getLayout()) {
-                if ("Rendition Name".equals(fd.getName())) rendition_name_guid = fd.getFieldUID();
-                if ("State".equals(fd.getName())) rendition_state_guid = fd.getFieldUID();
-            }
-            String query = String.format(Locale.ROOT, "%s == \"%s\" && %s == \":ID:%d\"",
-                rendition_name_guid, "JPEG2000",
-                rendition_state_guid, FINISHED_STATE_ID);
-            renditions.find(query, null, null, null);
-            if (renditions.getItemCount() == 1) {
-                Item rendition = renditions.iterator().next();
-                if (rendition.hasValue(GUID.UID_REC_ASSET_REFERENCE)) {
-                    ar = rendition.getAssetReferenceValue(GUID.UID_REC_ASSET_REFERENCE);
-                }
-            }
-        }
-        return ar;
+        addValue(convertImpl(getAsString(record)), resultList);
     }
 
     String convertImpl(String input) {

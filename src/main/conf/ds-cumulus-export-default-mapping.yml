@@ -70,7 +70,7 @@ digisam:
           dest: "image"
 
         - source: "Renditions Manager"
-          sourceType: "assetReferenceRendition"
+          sourceType: "assetReference"
           dest: "image_preview"
           destType: "url"
           pattern: "^.*:/Depot/DAMJP2/(.*).jp2"
@@ -80,7 +80,7 @@ digisam:
           required: true
 
         - source: "Renditions Manager"
-          sourceType: "assetReferenceRendition"
+          sourceType: "assetReference"
           dest: "image_full"
           destType: "url"
           verifyURL: false # We already did this for image_preview
@@ -89,7 +89,7 @@ digisam:
           lineBreakIsMulti: false
 
         - source: "Renditions Manager"
-          sourceType: "assetReferenceRendition"
+          sourceType: "assetReference"
           dest: "iiif"
           destType: "url"
           verifyURL: false # We already did this for image_preview

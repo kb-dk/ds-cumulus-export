@@ -26,6 +26,9 @@ class FieldMapperTest {
      */
     @Test
     public void testBasicMapping() throws IOException {
+        // FIXME: This doe snot seem to resolve properly?
+        final String JPEG2000 =
+            "cumulus-core-01:/Depot/DAMJP2/Online_Master_Arkiv/non-archival/KOB/bs_kistebilleder-2/bs000030.jp2";
         CumulusRecordMock record = new CumulusRecordMock(
             "guid", "Uid:dk:kb:doms:2007-01/b29e6d60-717e-11e0-82d7-002185371280",
             "Titel", "myTitle",
@@ -35,9 +38,10 @@ class FieldMapperTest {
             "Emneord", "Old wars\nNew orders",
             "Ophav", "H.C. Andersen\nGrimm E. Ulv",
             "Copyright", "Custom License",
-            "Asset Reference", "Some reference"/*,
-            "Renditions Manager", "cumulus-core-01:/Depot/DAMJP2/Online_Master_Arkiv/non-archival/KOB/bs_kistebilleder-2/bs000030.jp2"*/
+            "Asset Reference", "Some reference",
+            "Renditions Manager", JPEG2000
         );
+        record.addAsset(JPEG2000);
         FieldMapper mapper = new FieldMapper();
         FieldMapper.FieldValues fieldValues = mapper.apply(record);
         Assertions.assertNotNull(fieldValues, "The FieldMapper should produce fieldValues");
