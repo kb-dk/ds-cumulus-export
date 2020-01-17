@@ -14,18 +14,24 @@
  */
 package dk.kb.ds.cumulus.export;
 
+import dk.kb.cumulus.CumulusRecord;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 
 import java.io.IOException;
 
 class FieldMapperTest {
+
+    @Mock
+    CumulusRecord recordMock;
 
     /**
      * This test uses the ds-cumulus-export-default-mapping.yml configuration from test/resources.
      */
     @Test
     public void testBasicMapping() throws IOException {
+
         CumulusRecordMock record = new CumulusRecordMock(
             "guid", "Uid:dk:kb:doms:2007-01/b29e6d60-717e-11e0-82d7-002185371280",
             "Titel", "myTitle",

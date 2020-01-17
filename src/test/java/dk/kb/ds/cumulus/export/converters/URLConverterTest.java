@@ -59,5 +59,21 @@ class URLConverterTest {
                 fieldValues,
                 "myURL", "https://kb.dk/");
         }
+
+        conf.put(URLConverter.CONF_PATTERN, "^.*:/Depot/DAMJP2/(.*).jp2");
+        conf.put(URLConverter.CONF_REPLACEMENT, "https://kb-images.kb.dk/DAMJP2/$1/full/!345,2555/0/native.jpg");
+        conf.put(URLConverter.CONF_VERIFY_URL, false);
+        {
+            Converter converter = ConverterFactory.buildConverter(new YAML(conf));
+            CumulusRecordMock record = new CumulusRecordMock("mySource", "cumulus-core-01:/Depot/DAMJP2/ad1/ad2/ad3/ad4/picture.jp2");
+            FieldMapper.FieldValues fieldValues = new FieldMapper.FieldValues();
+            converter.convert(record, fieldValues);
+
+            DSAsserts.assertFieldValues(
+                fieldValues,
+                "myURL",
+                "https://kb-images.kb.dk/DAMJP2/ad1/ad2/ad3/ad4/picture/full/!345,2555/0/native.jpg");
+
+        }
     }
 }
