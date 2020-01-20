@@ -14,12 +14,13 @@
  */
 package dk.kb.ds.cumulus.export;
 
-import com.canto.cumulus.CumulusSession;
-import com.canto.cumulus.GUID;
-import com.canto.cumulus.ItemCollection;
+import com.canto.cumulus.*;
+import com.canto.cumulus.constants.CombineMode;
 import com.canto.cumulus.fieldvalue.AssetReference;
 import dk.kb.cumulus.CumulusRecord;
 import dk.kb.cumulus.field.Field;
+import dk.kb.ds.cumulus.export.converters.Converter;
+import org.mockito.Mockito;
 import org.objenesis.Objenesis;
 import org.objenesis.ObjenesisStd;
 import org.objenesis.instantiator.ObjectInstantiator;
@@ -32,18 +33,18 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 import java.io.File;
 import java.io.OutputStream;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+
+import static org.mockito.Mockito.*;
 
 /**
  * Used for unit testing {@link FieldMapper} and friends.
  */
 public class CumulusRecordMock extends CumulusRecord {
-    private static final Logger log = LoggerFactory.getLogger(FieldMapper.class);
+    private static final Logger log = LoggerFactory.getLogger(CumulusRecordMockTest.class);
 
     public Map<String, String> content = new HashMap<>();
+    public List<String> assets = new ArrayList<>();
 
     public CumulusRecordMock() {
         super(null, null);
@@ -66,6 +67,14 @@ public class CumulusRecordMock extends CumulusRecord {
 
     public void putAll(Map<? extends String, ? extends String> map) {
         content.putAll(map);
+    }
+
+    /**
+     * Add images for the record with this method. they are used for {@link Converter#getRenditionAssetReference}.
+     * @param asset
+     */
+    public void addAsset(String asset) {
+        assets.add(asset);
     }
 
     public void clear() {
@@ -133,13 +142,50 @@ public class CumulusRecordMock extends CumulusRecord {
 
     @Override
     public GUID getGUID(String fieldname){
-        return null;//content.get(GUID.UID_REC_ASSET_REFERENCE); //??
+        return GUID.UID_REC_ASSET_REFERENCE;
     }
 
+    /**
+     * Convoluted mock, assuming that the method is used for retrieving an AssetReference.
+     * @param guid the ID for the AssetReference. Must have been added earlier with {@link #addAsset(String)}.
+     * @return a mocked ItemCollection that can ultimately resolve a mocked AssetReference.
+     */
     @Override
     public ItemCollection getTableValue(GUID guid){
-//      return fake ItemCollection??
-        return null;
+        if (assets.isEmpty()) {
+            log.warn("Requesting getTableValue but no assets has been added");
+        }
+        ItemCollection itemCollection = mock(ItemCollection.class);
+        Layout layout = mock(Layout.class);
+
+        FieldDefinition fdRenditionName = mock(FieldDefinition.class);
+        when(fdRenditionName.getName()).thenReturn("Rendition Name");
+        when(fdRenditionName.getFieldUID()).thenReturn(mock(GUID.class)); // We don't care about its state when mocking
+
+        FieldDefinition fdState = mock(FieldDefinition.class);
+        when(fdState.getName()).thenReturn("State");
+        when(fdState.getFieldUID()).thenReturn(mock(GUID.class)); // We don't care about its state when mocking
+
+        when(layout.iterator()).thenReturn(Arrays.asList(fdRenditionName, fdState).iterator());
+        when(itemCollection.getLayout()).thenReturn(layout);
+        // No return value, but we mock it to avoid an exception
+        Mockito.doNothing().when(itemCollection).
+            find(anyString(), anyObject(), any(CombineMode.class), any(Locale.class));
+        when(itemCollection.getItemCount()).thenReturn(assets.size());
+
+        List<Item> items = new ArrayList<>(assets.size());
+        for (String asset: assets) {
+            Item item = mock(Item.class);
+            when(item.hasValue(any(GUID.class))).thenReturn(true);
+            AssetReferenceMock ar = (AssetReferenceMock)arInstantiator.newInstance();
+            ar.setDisplayString(asset);
+            when(item.getAssetReferenceValue(any(GUID.class))).thenReturn(ar);
+            items.add(item);
+        }
+
+        when(itemCollection.iterator()).thenReturn(items.iterator());
+
+        return itemCollection;
     }
 
     @Override

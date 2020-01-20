@@ -39,4 +39,6 @@ class CumulusRecordMockTest {
         assertNotNull(ar, "There should be an asset reference for field 'asset'");
         assertEquals("foo", ar.getDisplayString(), "The display string for the AssetReference should be as expected");
     }
+
+
 }
