@@ -16,10 +16,10 @@ package dk.kb.ds.cumulus.export;
 
 import com.canto.cumulus.*;
 import com.canto.cumulus.constants.CombineMode;
+import com.canto.cumulus.constants.FindFlag;
 import com.canto.cumulus.fieldvalue.AssetReference;
 import dk.kb.cumulus.CumulusRecord;
 import dk.kb.cumulus.field.Field;
-import dk.kb.ds.cumulus.export.converters.Converter;
 import org.mockito.Mockito;
 import org.objenesis.Objenesis;
 import org.objenesis.ObjenesisStd;
