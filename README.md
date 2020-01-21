@@ -29,7 +29,7 @@ to `user.home`. This file does not need to be adjusted.
 This project requires [Cumulus JAVA SDK](https://sbprojects.statsbiblioteket.dk/display/AIM/Cumulus+Java+SDK).
 See the section "Installing cumulus API" at the bottom of this README.
  
-## Build
+## Build & deploy
 
 When the config files are copied and the Cumulus API is installed, 
 `ds-cumulus-export` can be build with the standard
@@ -37,15 +37,15 @@ When the config files are copied and the Cumulus API is installed,
 mvn package
 ```
 
-## Run
-
 After build has been completed, there should be a tar-archive intended for deployment in the `target`-folder.
- In order to runt the program, the archive must be unpacked:
+ In order to use the application, the archive must be unpacked:
 ```
 tar -xf target/cumulus-export-0.1-SNAPSHOT-distribution.tar.gz -C target/
 ```
 
-After that, an export can be activated with
+## Run
+
+After building & deploying, an export can be activated with
 ```
 target/cumulus-export-0.1-SNAPSHOT/bin/cumulus-export.sh
 ```
