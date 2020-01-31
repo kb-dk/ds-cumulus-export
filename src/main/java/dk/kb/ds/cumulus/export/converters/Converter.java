@@ -14,6 +14,9 @@
  */
 package dk.kb.ds.cumulus.export.converters;
 
+import com.canto.cumulus.GUID;
+import com.canto.cumulus.Item;
+import com.canto.cumulus.ItemCollection;
 import com.canto.cumulus.fieldvalue.AssetReference;
 import dk.kb.cumulus.CumulusRecord;
 import dk.kb.ds.cumulus.export.FieldMapper;
@@ -21,7 +24,9 @@ import dk.kb.ds.cumulus.export.YAML;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 /**
@@ -33,6 +38,7 @@ public abstract class Converter {
     // YAML keys
     public static final String CONF_SOURCE =                 "source";
     public static final String CONF_SOURCE_TYPE =            "sourceType";
+    public static final String DEFAULT_SOURCE_TYPE =         "string";
 
     public static final String CONF_DEST =                   "dest";
     public static final String CONF_FALLBACK_DEST =          "fallbackDest";
@@ -50,7 +56,16 @@ public abstract class Converter {
 
         // We cannot use "long" as enum (it is a reserved word), so we need to handle from- and to-String
         public static SOURCE_TYPE getEnum(String value) {
-            return "long".equals(value) ? longType : valueOf(value);
+            if (value == null) {
+                return valueOf(DEFAULT_SOURCE_TYPE);
+            }
+            try {
+                return "long".equals(value) ? longType : valueOf(value);
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException(String.format(
+                    Locale.ENGLISH,"The source type '%s' is unknown. Valid source types are %s",
+                    value, Arrays.toString(SOURCE_TYPE.values())));
+            }
         }
         @Override
         public String toString() {
@@ -176,12 +191,13 @@ public abstract class Converter {
                 break;
             }
             case assetReference: {
-                AssetReference assetReference = record.getAssetReference(source);
-                if (assetReference == null) {
+                GUID guid = record.getGUID(source);
+                if (guid == null) {
+                    value = null;
                     break;
                 }
-                // Old code: record.getAssetReference("Asset Reference").getPart(0).getDisplayString()
-                value = assetReference.getDisplayString();
+                AssetReference assetReference = getRenditionAssetReference(record, guid);
+                value = assetReference == null ? null : assetReference.getDisplayString();
                 break;
             }
             default: value = null;
@@ -217,7 +233,12 @@ public abstract class Converter {
                 break;
             }
             case assetReference: {
-                value = record.getAssetReference(source);
+                GUID guid = record.getGUID(source);
+                if (guid == null) {
+                    value = null;
+                    break;
+                }
+                value = getRenditionAssetReference(record, guid);
                 break;
             }
             default: value = null;
@@ -261,6 +282,33 @@ public abstract class Converter {
             resultList.add(new FieldMapper.FieldValue(destination, value.toString()));
         }
     }
+
+    protected AssetReference getRenditionAssetReference(CumulusRecord record, GUID guid) {
+        GUID rendition_name_guid = null;
+        GUID rendition_state_guid = null;
+        final int FINISHED_STATE_ID = 3;
+        AssetReference ar = null;
+
+        ItemCollection renditions = record.getTableValue(guid);
+        if (renditions != null) {
+            for (com.canto.cumulus.FieldDefinition fd : renditions.getLayout()) {
+                if ("Rendition Name".equals(fd.getName())) rendition_name_guid = fd.getFieldUID();
+                if ("State".equals(fd.getName())) rendition_state_guid = fd.getFieldUID();
+            }
+            String query = String.format(Locale.ROOT, "%s == \"%s\" && %s == \":ID:%d\"",
+                rendition_name_guid, "JPEG2000",
+                rendition_state_guid, FINISHED_STATE_ID);
+            renditions.find(query, null, null, null);
+            if (renditions.getItemCount() == 1) {
+                Item rendition = renditions.iterator().next();
+                if (rendition.hasValue(GUID.UID_REC_ASSET_REFERENCE)) {
+                    ar = rendition.getAssetReferenceValue(GUID.UID_REC_ASSET_REFERENCE);
+                }
+            }
+        }
+        return ar;
+    }
+
 
     /**
      * "Override" this in implementing classes and call something like

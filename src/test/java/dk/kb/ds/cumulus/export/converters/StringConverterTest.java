@@ -57,14 +57,15 @@ class StringConverterTest {
     @Test
     public void testAssetReferenceSource() {
         Map<String, Object> conf = new LinkedHashMap<>();
-        conf.put(Converter.CONF_SOURCE, "mySource");
+        conf.put(Converter.CONF_SOURCE, "mySource"); // Doesn't matter as assets are mocked without keys
         conf.put(Converter.CONF_SOURCE_TYPE, Converter.SOURCE_TYPE.assetReference);
         conf.put(Converter.CONF_DEST, "myDest");
         conf.put(Converter.CONF_DEST_TYPE, "string");
 
         StringConverter single = new StringConverter(new YAML(conf));
-        CumulusRecordMock record = new CumulusRecordMock("mySource", "foo");
+        CumulusRecordMock record = new CumulusRecordMock();
         FieldMapper.FieldValues singleFV = new FieldMapper.FieldValues();
+        record.addAsset("foo");
         single.convert(record, singleFV);
 
         DSAsserts.assertFieldValues(

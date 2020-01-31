@@ -26,6 +26,8 @@ class FieldMapperTest {
      */
     @Test
     public void testBasicMapping() throws IOException {
+        final String JPEG2000 =
+            "cumulus-core-01:/Depot/DAMJP2/online_master_arkiv/non-archival/KOB/bs_kistebilleder-2/bs000030.jp2";
         CumulusRecordMock record = new CumulusRecordMock(
             "guid", "Uid:dk:kb:doms:2007-01/b29e6d60-717e-11e0-82d7-002185371280",
             "Titel", "myTitle",
@@ -35,8 +37,10 @@ class FieldMapperTest {
             "Emneord", "Old wars\nNew orders",
             "Ophav", "H.C. Andersen\nGrimm E. Ulv",
             "Copyright", "Custom License",
-            "Asset Reference", "cumulus-core-01:/Depot/DAMX/Online_Master_Arkiv/non-archival/KOB/bs_kistebilleder-2/bs000030.tif"
+            "Asset Reference", "Some reference",
+            "Renditions Manager", JPEG2000
         );
+        record.addAsset(JPEG2000);
         FieldMapper mapper = new FieldMapper();
         FieldMapper.FieldValues fieldValues = mapper.apply(record);
         Assertions.assertNotNull(fieldValues, "The FieldMapper should produce fieldValues");
@@ -48,6 +52,7 @@ class FieldMapperTest {
             "datetime", "2019-11-11",
             "created_date", "2019-10-04T08:05:10Z",
             "license", "Custom License",
+            "image", "Some reference",
             "image_preview", "https://kb-images.kb.dk/DAMJP2/online_master_arkiv/non-archival/KOB/bs_kistebilleder-2/bs000030/full/!345,2555/0/native.jpg",
             "image_full", "https://kb-images.kb.dk/DAMJP2/online_master_arkiv/non-archival/KOB/bs_kistebilleder-2/bs000030/full/full/0/default.jpg",
             "iiif", "https://kb-images.kb.dk/DAMJP2/online_master_arkiv/non-archival/KOB/bs_kistebilleder-2/bs000030/"

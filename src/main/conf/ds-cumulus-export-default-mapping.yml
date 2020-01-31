@@ -66,29 +66,34 @@ digisam:
           lineBreakIsMulti: false
 
         - source: "Asset Reference"
+          dest: "image"
+
+        - source: "Renditions Manager"
+          sourceType: "assetReference"
           dest: "image_preview"
           destType: "url"
-          pattern: "^.*:/Depot/DAMX/Online_Master_Arkiv/(.*).tif"
-          replacement: "https://kb-images.kb.dk/DAMJP2/online_master_arkiv/$1/full/!345,2555/0/native.jpg"
+          pattern: "^.*:/Depot/DAMJP2/(.*).jp2"
+          replacement: "https://kb-images.kb.dk/DAMJP2/$1/full/!345,2555/0/native.jpg"
           verifyPattern: "^https?(.+)" # There is a problem with the certificate so we use plain HTTP
           verifyReplacement: "http$1"
           required: true
 
-        - source: "Asset Reference"
+        - source: "Renditions Manager"
+          sourceType: "assetReference"
           dest: "image_full"
           destType: "url"
           verifyURL: false # We already did this for image_preview
-          pattern: "^.*:/Depot/DAMX/Online_Master_Arkiv/(.*).tif"
-          replacement: "https://kb-images.kb.dk/DAMJP2/online_master_arkiv/$1/full/full/0/default.jpg"
+          pattern: "^.*:/Depot/DAMJP2/(.*).jp2"
+          replacement: "https://kb-images.kb.dk/DAMJP2/$1/full/full/0/default.jpg"
           lineBreakIsMulti: false
 
-        - source: "Asset Reference"
+        - source: "Renditions Manager"
           sourceType: "assetReference"
           dest: "iiif"
           destType: "url"
           verifyURL: false # We already did this for image_preview
-          pattern: "^.*:/Depot/DAMX/Online_Master_Arkiv/(.*).tif"
-          replacement: "https://kb-images.kb.dk/DAMJP2/online_master_arkiv/$1/"
+          pattern: "^.*:/Depot/DAMJP2/(.*).jp2"
+          replacement: "https://kb-images.kb.dk/DAMJP2/$1/"
           lineBreakIsMulti: false
 
         - source: "Horizontal Pixels"

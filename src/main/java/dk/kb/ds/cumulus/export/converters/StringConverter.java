@@ -14,7 +14,6 @@
  */
 package dk.kb.ds.cumulus.export.converters;
 
-import com.canto.cumulus.fieldvalue.AssetReference;
 import dk.kb.cumulus.CumulusRecord;
 import dk.kb.ds.cumulus.export.FieldMapper;
 import dk.kb.ds.cumulus.export.YAML;
@@ -61,18 +60,7 @@ public class StringConverter extends Converter {
 
     @Override
     public void convertImpl(CumulusRecord record, List<FieldMapper.FieldValue> resultList) {
-        switch (sourceType) {
-            case string: {
-                addValue(convertImpl(getAsString(record)), resultList);
-                break;
-            }
-            case assetReference: {
-                AssetReference ar = record.getAssetReference(source);
-                addValue(convertImpl(ar.getDisplayString()), resultList);
-                break;
-            }
-            default: throw new UnsupportedOperationException("The source type '" + sourceType + "' is not supported");
-        }
+        addValue(convertImpl(getAsString(record)), resultList);
     }
 
     String convertImpl(String input) {
@@ -85,6 +73,9 @@ public class StringConverter extends Converter {
         }
         Matcher matcher = pattern.matcher(value);
         if (!matcher.matches()) {
+            log.debug("The matching of pattern and value failed:");
+            log.debug("Pattern: {}", pattern);
+            log.debug("Value: {}", value);
             return null;
         }
         return replacement == null ? value : matcher.replaceAll(replacement);
