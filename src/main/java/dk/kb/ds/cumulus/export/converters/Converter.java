@@ -193,11 +193,14 @@ public abstract class Converter {
             case assetReference: {
                 GUID guid = record.getGUID(source);
                 if (guid == null) {
-                    value = null;
+                    // value = null
                     break;
                 }
                 AssetReference assetReference = getRenditionAssetReference(record, guid);
                 value = assetReference == null ? null : assetReference.getDisplayString();
+                if (value == null){
+                    log.debug("Record Name: {} is not on picture server", record.getFieldValueOrNull("Record Name"));
+                }
                 break;
             }
             default: value = null;
