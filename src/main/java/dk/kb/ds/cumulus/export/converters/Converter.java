@@ -286,6 +286,13 @@ public abstract class Converter {
         }
     }
 
+    /**
+     * Extracts the Asset Reference for the Renditions Manager part of the record. This is used to
+     * find the path to the picture server for the record.
+     * @param record The record to extract from
+     * @param guid The guid of the Renditions Manager
+     * @return The unix path of the record's Renditions Manager Asset Reference
+     */
     protected AssetReference getRenditionAssetReference(CumulusRecord record, GUID guid) {
         GUID rendition_name_guid = null;
         GUID rendition_state_guid = null;

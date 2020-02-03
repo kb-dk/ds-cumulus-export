@@ -59,7 +59,7 @@ digisam:
         - source: "Emneord"  # COP: N/A
           dest: "subject"
 
-        - source: "Ophav"  # Known to change format, related to "Person"
+        - source: "Ophav"  # COP: Ophav (Known to change format, related to "Person")
           dest: "author"
 
         - source: "Copyright"  # COP: Ophavsret
@@ -99,11 +99,11 @@ digisam:
           replacement: "https://kb-images.kb.dk/DAMJP2/$1/"
           lineBreakIsMulti: false
 
-        - source: "Horizontal Pixels"  # COP: part of Dimension
+        - source: "Horizontal Pixels"  # COP: part of Dimension (H x V)
           dest: "width_pixels"
           destType: "long"
 
-        - source: "Vertical Pixels"  # COP: part of Dimension
+        - source: "Vertical Pixels"  # COP: part of Dimension (H x V)
           dest: "height_pixels"
           destType: "long"
 
@@ -117,7 +117,7 @@ digisam:
           dest: "material_2"
 
         - source: "Opstilling"  # COP: Opstilling
-          dest: "archive" # Better tag needed
+          dest: "archive" # Better tag needed (shelf_mark?)
 
         - source: "Lokalitet"  # COP: Lokalitet
           dest: "location"
@@ -138,7 +138,7 @@ digisam:
           dest: "related_url"
           destType: "url"
           pattern: "http://www.kb.dk/(.*)"
-          replacement: "http://www5.kb.dk/$1"  # is this COP only??
+          replacement: "http://www5.kb.dk/$1"  # This is current COP implementation
           verifyURL: true
 
         - source: "URL-tekst" # COP: Releateret (The text to display for the link above)
