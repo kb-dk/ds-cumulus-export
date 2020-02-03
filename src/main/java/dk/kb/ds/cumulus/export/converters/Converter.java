@@ -199,7 +199,7 @@ public abstract class Converter {
                 AssetReference assetReference = getRenditionAssetReference(record, guid);
                 value = assetReference == null ? null : assetReference.getDisplayString();
                 if (value == null){
-                    log.debug("Record Name: {} is not on picture server", record.getFieldValueOrNull("Record Name"));
+                    log.warn("Record Name: {} is not on picture server and is thus not included", record.getFieldValueOrNull("Record Name"));
                 }
                 break;
             }
