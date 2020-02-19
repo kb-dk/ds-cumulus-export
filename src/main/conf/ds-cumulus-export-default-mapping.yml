@@ -69,7 +69,7 @@ digisam:
           dest: "license_notice"
 
         - source: "Asset Reference"  # COP: N/A
-          dest: "image"
+          dest: "source_material_reference"
 
         - source: "Renditions Manager"
           sourceType: "assetReference"
