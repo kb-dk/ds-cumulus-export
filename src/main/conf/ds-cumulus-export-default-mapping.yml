@@ -111,13 +111,13 @@ digisam:
           dest: "record_name"
 
         - source: "Materialebetegnelse"  # COP: Ressourcetype 1 (If missing: Generel materialebetegnelse below is shown)
-          dest: "material_1"
+          dest: "physical_source_1"
 
         - source: "Generel materialebetegnelse"  # COP: Ressourcetype 2
-          dest: "material_2"
+          dest: "physical_source_2"
 
         - source: "Opstilling"  # COP: Opstilling
-          dest: "archive" # Better tag needed (shelf_mark?)
+          dest: "archive_location"
 
         - source: "Lokalitet"  # COP: Lokalitet
           dest: "location"
@@ -126,21 +126,23 @@ digisam:
           dest: "accession_number"
 
         - source: "Keywords"  # COP: Emne
-          dest: "topic"  # or replace keyword?
+          dest: "topic"
 
         - source: "Note"  # COP: Kommentar
           dest: "note"
 
         - source: "Person" # COP: Person (Known to change format, related to "Ophav")
-          dest: "person"
+          dest: "subject_person"
 
+# TODO: The "URL" and URL-tekst" relationship should be implemented differently in a later version.
+# Maybe as markdown-style by storing [URL-tekst](URL)
         - source: "URL"  # COP: Relateret (The link to main page for pictures)
           dest: "related_url"
           destType: "url"
           pattern: "http://www.kb.dk/(.*)"
-          replacement: "http://www5.kb.dk/$1"  # This is current COP implementation
+          replacement: "http://www5.kb.dk/$1"
           verifyURL: true
 
-        - source: "URL-tekst" # COP: Releateret (The text to display for the link above)
+        - source: "URL-tekst" # COP: Relateret (The text to display for the link above)
           dest: "related_url_text"
 
