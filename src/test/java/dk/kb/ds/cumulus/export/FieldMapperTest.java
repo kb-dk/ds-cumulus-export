@@ -52,7 +52,7 @@ class FieldMapperTest {
             "datetime", "2019-11-11",
             "created_date", "2019-10-04T08:05:10Z",
             "license", "Custom License",
-            "image", "Some reference",
+            "source_material_reference", "Some reference",
             "image_preview", "https://kb-images.kb.dk/DAMJP2/online_master_arkiv/non-archival/KOB/bs_kistebilleder-2/bs000030/full/!345,2555/0/native.jpg",
             "image_full", "https://kb-images.kb.dk/DAMJP2/online_master_arkiv/non-archival/KOB/bs_kistebilleder-2/bs000030/full/full/0/default.jpg",
             "iiif", "https://kb-images.kb.dk/DAMJP2/online_master_arkiv/non-archival/KOB/bs_kistebilleder-2/bs000030/"
