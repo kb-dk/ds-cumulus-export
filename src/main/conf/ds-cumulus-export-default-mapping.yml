@@ -31,7 +31,7 @@ digisam:
   maps:
     default:
       converters:
-        - source: "guid"
+        - source: "guid"  # COP: N/A
           dest: "id"
           required: true
           # Uid:dk:kb:doms:2007-01/b29e6d60-717e-11e0-82d7-002185371280
@@ -39,34 +39,37 @@ digisam:
           # ds_billedsamling_b29e6d60-717e-11e0-82d7-002185371280
           replacement: "ds_billedsamling_$1"
 
-        - source: "Titel"
+        - source: "Titel"  # COP: Titel
           dest: "title"
 
-        - source: "Item Creation Date"
+        - source: "Item Creation Date"  # COP: N/A
           dest: "created_date"
           destType: "datetime"
           destFallback: "created_date_verbatim"
 
-        - source: "År"
+        - source: "År"  # COP: Oprindelsesdato
           dest: "datetime"
           destType: "datetimeRange"
           destFallback: "datetime_verbatim"
 
-        - source: "Categories"
-          dest: "keyword"
+        - source: "Categories"  # COP: "Indgår i"/"Is part of", this is presented as a link
+          dest: "keyword"  # New dest?
+#          dest_type: url  How to retrieve this? (hover over in Cumulus shows part of the link)
 
-        - source: "Emneord"
+        - source: "Emneord"  # COP: N/A
           dest: "subject"
 
-        - source: "Ophav"
+        - source: "Ophav"  # COP: Ophav (Known to change format, related to "Person")
           dest: "author"
 
-        - source: "Copyright"
+        - source: "Copyright"  # COP: Ophavsret
           dest: "license"
-          lineBreakIsMulti: false
 
-        - source: "Asset Reference"
-          dest: "image"
+        - source: "Copyright Notice"  # COP: Ophavsret (added to field above)
+          dest: "license_notice"
+
+        - source: "Asset Reference"  # COP: N/A
+          dest: "source_material_reference"
 
         - source: "Renditions Manager"
           sourceType: "assetReference"
@@ -108,11 +111,50 @@ digisam:
           extPattern: "\\{\"message\":\"20,([a-zA-Z]+),([0-9]+) ([0-9]+).*"
           extReplacement: "$1$3_$2"
 
-        - source: "Horizontal Pixels"
+        - source: "Horizontal Pixels"  # COP: part of Dimension (H x V)
           dest: "width_pixels"
           destType: "long"
 
-        - source: "Vertical Pixels"
+        - source: "Vertical Pixels"  # COP: part of Dimension (H x V)
           dest: "height_pixels"
           destType: "long"
+
+        - source: "Record Name"  # COP: Id
+          dest: "record_name"
+
+        - source: "Materialebetegnelse"  # COP: Ressourcetype 1 (If missing: Generel materialebetegnelse below is shown)
+          dest: "physical_source_1"
+
+        - source: "Generel materialebetegnelse"  # COP: Ressourcetype 2
+          dest: "physical_source_2"
+
+        - source: "Opstilling"  # COP: Opstilling
+          dest: "archive_location"
+
+        - source: "Lokalitet"  # COP: Lokalitet
+          dest: "location"
+
+        - source: "Accessionsnr"  # COP: Accessionsnummer
+          dest: "accession_number"
+
+        - source: "Keywords"  # COP: Emne
+          dest: "topic"
+
+        - source: "Note"  # COP: Kommentar
+          dest: "note"
+
+        - source: "Person" # COP: Person (Known to change format, related to "Ophav")
+          dest: "subject_person"
+
+# TODO: The "URL" and URL-tekst" relationship should be implemented differently in a later version.
+# Maybe as markdown-style by storing [URL-tekst](URL)
+        - source: "URL"  # COP: Relateret (The link to main page for pictures)
+          dest: "related_url"
+          destType: "url"
+          pattern: "http://www.kb.dk/(.*)"
+          replacement: "http://www5.kb.dk/$1"
+          verifyURL: true
+
+        - source: "URL-tekst" # COP: Relateret (The text to display for the link above)
+          dest: "related_url_text"
 
