@@ -64,7 +64,7 @@ public class CumulusStats {
             startNS = System.nanoTime();
             StreamSupport.stream(records.spliterator(), false).
                 limit(-1 == maxRecords ? Long.MAX_VALUE : maxRecords).
-                forEach(this::collect);
+                forEachOrdered(this::collect);
             System.out.println("-------------------------------- Final stats @ record " + recordCounter);
             printStats();
         }
@@ -174,7 +174,7 @@ public class CumulusStats {
             values.entrySet().stream().
                 sorted(Comparator.comparingInt(e -> -e.getValue().get())). // - to reverse the order
                 limit(MAX_OUTPUT_VALUES == -1 ? Integer.MAX_VALUE : MAX_OUTPUT_VALUES).
-                forEach(entry -> sb.append(entry.getValue()).append(": ").append(entry.getKey()).append("\n"));
+                forEachOrdered(entry -> sb.append(entry.getValue()).append(": ").append(entry.getKey()).append("\n"));
             return sb.toString();
         }
     }

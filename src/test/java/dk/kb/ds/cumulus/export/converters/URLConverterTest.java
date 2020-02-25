@@ -3,7 +3,7 @@ package dk.kb.ds.cumulus.export.converters;
 import dk.kb.ds.cumulus.export.CumulusRecordMock;
 import dk.kb.ds.cumulus.export.DSAsserts;
 import dk.kb.ds.cumulus.export.FieldMapper;
-import dk.kb.ds.cumulus.export.YAML;
+import dk.kb.util.YAML;
 import org.junit.jupiter.api.Test;
 
 import java.util.LinkedHashMap;

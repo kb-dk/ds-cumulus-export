@@ -16,7 +16,7 @@ package dk.kb.ds.cumulus.export.converters;
 
 import dk.kb.ds.cumulus.export.Configuration;
 import dk.kb.ds.cumulus.export.FieldMapper;
-import dk.kb.ds.cumulus.export.YAML;
+import dk.kb.util.YAML;
 import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,11 +90,22 @@ public class ConverterFactory {
      * @throws IOException if the configuration could not be resolved/fetched.
      */
     public static List<Converter> build(String converterConfig, String mapName) throws IOException {
+        return build(YAML.resolveConfig(converterConfig, Configuration.CONF_ROOT), mapName);
+    }
+
+    /**
+     * Creates a Map of {@link Converter}s from the given configuration.
+     * @param setup   yaml for the converter setup.
+     *                See ds-cumulus-export-default-mapping.yml in the test folder for a sample setup.
+     * @param mapName the name of the map in the given converterConfig to use. Default is "default".
+     * @return a list with Converters as specified in converterConfig.
+     * @throws IOException if the configuration could not be resolved/fetched.
+     */
+    public static List<Converter> build(YAML setup, String mapName) throws IOException {
         if (mapName == null) {
             mapName = DEFAULT_MAP;
         }
-        YAML baseYAML = YAML.resolveConfig(converterConfig, Configuration.CONF_ROOT);
-        YAML mapYAML = baseYAML.getSubMap(CONF_MAPS + "." + mapName);
+        YAML mapYAML = setup.getSubMap(CONF_MAPS + "." + mapName);
         if (mapYAML == null) {
             throw new IOException("Unable to locate map '" + mapName + "'");
         }

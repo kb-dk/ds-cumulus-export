@@ -13,3 +13,6 @@ digisam:
       - cat1
       - cat2
 
+  # Services used by behaviour-configurations such as ds-cumulus-export-default-mapping.yml
+  services:
+    - &dHashService "http://localhost:8080/ds-image-analysis/api/imageDHash/imgURL/?imgURL=$1"

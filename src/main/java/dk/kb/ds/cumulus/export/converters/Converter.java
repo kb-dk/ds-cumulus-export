@@ -20,7 +20,7 @@ import com.canto.cumulus.ItemCollection;
 import com.canto.cumulus.fieldvalue.AssetReference;
 import dk.kb.cumulus.CumulusRecord;
 import dk.kb.ds.cumulus.export.FieldMapper;
-import dk.kb.ds.cumulus.export.YAML;
+import dk.kb.util.YAML;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -260,7 +260,7 @@ public abstract class Converter {
         if (values == null) {
             return;
         }
-        values.stream().filter(Objects::nonNull).forEach(value -> addValue(value, resultList));
+        values.stream().filter(Objects::nonNull).forEachOrdered(value -> addValue(value, resultList));
     }
     /**
      * Add the given value to the resultList if the value is not null.

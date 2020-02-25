@@ -17,6 +17,7 @@ package dk.kb.ds.cumulus.export;
 import dk.kb.cumulus.config.CumulusConfiguration;
 import dk.kb.cumulus.utils.ArgumentCheck;
 import dk.kb.ds.cumulus.export.converters.ConverterFactory;
+import dk.kb.util.YAML;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -85,6 +86,8 @@ public class Configuration {
     private String maxRecords;
 
     /** The configuration for Cumulus.*/
+    private final String confFile;
+    private final String confRoot;
     protected final CumulusConfiguration cumulusConf;
     private final String outputFile;
     private final String collection;
@@ -94,7 +97,11 @@ public class Configuration {
      * @throws IOException is the configuration could not be located or retrieved.
      */
     private Configuration() throws IOException {
-        confMap = YAML.resolveConfig(DEFAULT_CONF_FILE, CONF_ROOT);
+        // Expected to be configurable at some point
+        confFile = DEFAULT_CONF_FILE;
+        confRoot = CONF_ROOT;
+
+        confMap = YAML.resolveConfig(confFile, confRoot);
 
         this.cumulusConf = loadCumulusConfiguration(confMap.getSubMap(CONF_CUMULUS));
 
@@ -112,6 +119,17 @@ public class Configuration {
 
     public static CumulusConfiguration getCumulusConf() {
         return instance().cumulusConf;
+    }
+
+    /**
+     * @return the file containing the YAML for this Configuration.
+     */
+    public String getConfFile() {
+        return confFile;
+    }
+
+    public String getConfRoot() {
+        return confRoot;
     }
 
     public static String getCollection(){

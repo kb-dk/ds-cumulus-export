@@ -14,7 +14,7 @@
  */
 package dk.kb.ds.cumulus.export.converters;
 
-import dk.kb.ds.cumulus.export.YAML;
+import dk.kb.util.YAML;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

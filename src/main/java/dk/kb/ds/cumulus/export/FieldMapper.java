@@ -17,12 +17,14 @@ package dk.kb.ds.cumulus.export;
 import dk.kb.cumulus.CumulusRecord;
 import dk.kb.ds.cumulus.export.converters.Converter;
 import dk.kb.ds.cumulus.export.converters.ConverterFactory;
+import dk.kb.util.Resolver;
+import dk.kb.util.YAML;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -44,16 +46,43 @@ public class FieldMapper implements Function<CumulusRecord, FieldMapper.FieldVal
 
     /**
      * Loads a {@link ConverterFactory} setup, as specified in the base configuration, and constructs a field mapper.
-     * @throws IOException if the f
+     * Note that the setup is merged with the overall setup for ds-cumulus-export, allowing for separation of
+     * environment (in the ds-cumulus-setup YAML file) and behaviout (in the ConverterFactory YAML file) through
+     * the YAML alias mechanism.
+     * @throws IOException if the configuration could not be loaded.
      */
     public FieldMapper() throws IOException {
         final String convResource = Configuration.getYAML().getString(
             Configuration.CONF_CONVERSION_SETUP, Configuration.DEFAULT_CONVERSION_SETUP);
         final String convMap = Configuration.getYAML().getString(
             Configuration.CONF_CONVERSION_MAP, Configuration.DEFAULT_CONVERSION_MAP);
-        log.info("Loading conversion setup from resource " + convResource + " with map " + convMap);
-        converters = ConverterFactory.build(convResource, convMap);
-        log.debug("Loading successful for conversion setup from resource " + convResource + " with map " + convMap);
+        log.info("Loading conversion setup with base {} from resource {} with map {}",
+                 Configuration.instance().getConfFile(), convResource, convMap);
+
+        // We need to remove the "digisam:"-part from the resourceFile in order to use the 2 YAML files as one
+        YAML fieldYAML = getBaseMergedYaml(convResource);
+
+        converters = ConverterFactory.build(fieldYAML, convMap);
+        log.info("Loading successful for setup with base {} from resource {} with map {}",
+                 Configuration.instance().getConfFile(), convResource, convMap);
+    }
+
+    /**
+     * Merges the given YAML resource with the YAML for the base {@link Configuration}, removing the "digisam:"-line
+     * from the yamlResource (if present) to avoid duplicate key conflicts.
+     * @param yamlResource a YAML.
+     * @return a merged YAML from Configuration base and yamlResource.
+     * @throws IOException if the loading failed.
+     */
+    static YAML getBaseMergedYaml(String yamlResource) throws IOException {
+        YAML fieldYAML;
+        try (InputStream baseStream = Resolver.resolveStream(Configuration.instance().getConfFile());
+             InputStream resourceStream = new ByteArrayInputStream(
+                 Resolver.resolveUTF8String(yamlResource).replaceAll("^digisam:.*", "").getBytes("utf-8"));
+             InputStream mergeStream = new SequenceInputStream(baseStream, resourceStream)) {
+            fieldYAML = YAML.parse(mergeStream).getSubMap(Configuration.CONF_ROOT);
+        }
+        return fieldYAML;
     }
 
     /**

@@ -96,6 +96,18 @@ digisam:
           replacement: "https://kb-images.kb.dk/DAMJP2/$1/"
           lineBreakIsMulti: false
 
+        - source: "Renditions Manager"
+          sourceType: "assetReference"
+          dest: "dhash"
+          destType: "external"
+          pattern: "^.*:/Depot/DAMJP2/(.*).jp2"
+          replacement: "http://kb-images.kb.dk/DAMJP2/$1/full/!400,400/0/native.jpg"
+          # dHashService is an alias and must be defined in ds-cumulus-export.yml
+          # Note: YAML-validators will likely complain here as the alias-reference is not valid until YAML-merge
+          externalService: *dHashService
+          extPattern: "\\{\"message\":\"20,([a-zA-Z]+),([0-9]+) ([0-9]+).*"
+          extReplacement: "$1$3_$2"
+
         - source: "Horizontal Pixels"
           dest: "width_pixels"
           destType: "long"
@@ -103,3 +115,4 @@ digisam:
         - source: "Vertical Pixels"
           dest: "height_pixels"
           destType: "long"
+

@@ -2,6 +2,7 @@ package dk.kb.ds.cumulus.export;
 
 import dk.kb.ds.cumulus.export.converters.Converter;
 import dk.kb.ds.cumulus.export.converters.ConverterFactory;
+import dk.kb.util.YAML;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -27,8 +28,8 @@ class ConverterFactoryTest {
 
     @Test
     public void testDefaultFactory() throws IOException {
-        List<Converter> converters =
-            ConverterFactory.build("ds-cumulus-export-default-mapping.yml", null);
+        YAML setup = FieldMapper.getBaseMergedYaml("ds-cumulus-export-default-mapping.yml");
+        List<Converter> converters = ConverterFactory.build(setup, null);
         assertTrue(converters.size() > 0, "There should be at least 1 converter, but there was 0");
     }
 

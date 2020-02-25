@@ -15,9 +15,8 @@
 package dk.kb.ds.cumulus.export.converters;
 
 import dk.kb.cumulus.CumulusRecord;
-import dk.kb.ds.cumulus.export.CalendarUtils;
 import dk.kb.ds.cumulus.export.FieldMapper;
-import dk.kb.ds.cumulus.export.YAML;
+import dk.kb.util.YAML;
 
 import java.util.List;
 
