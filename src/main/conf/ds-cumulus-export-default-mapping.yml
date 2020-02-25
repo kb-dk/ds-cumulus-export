@@ -110,6 +110,7 @@ digisam:
           externalService: *dHashService
           extPattern: "\\{\"message\":\"20,([a-zA-Z]+),([0-9]+) ([0-9]+).*"
           extReplacement: "$1$3_$2"
+          required: true
 
         - source: "Horizontal Pixels"  # COP: part of Dimension (H x V)
           dest: "width_pixels"
